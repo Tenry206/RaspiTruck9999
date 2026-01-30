@@ -9,7 +9,7 @@ class Camera:
     def __init__(self, 
                  resolution =(640,480), 
                  fps = 60,
-                 roi_ratio = 0.35,
+                 roi_ratio = 0.75,
                  format = "RGB888"):
     
         # Frame duration (us)
@@ -61,59 +61,71 @@ class Camera:
         #frame.shape -> (height, width, channels)
         #The height of the camera frame in pixels.
         h = frame.shape[0]
-
+        
         # Find the starting row for the ROI
         roi_y = int(h*(1-self.roi_ratio))
 
         # Crops the bottom portion of the frame
-        roi = frame[roi_y:h, :]
+        roi = frame[roi_y:int(0.75*h), :]
 
         # grayscale
         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
+        # Contrast enhancement
+        #gray = cv2.equalizeHist(gray)
+
         #Gaussian Blur
         blur = cv2.GaussianBlur(gray, (5,5),0)
 
+
         #Convert Grayscale image into binary
         #invert black and white
-        #threshold of 60
         #return binary
-        _, thresh = cv2.threshold(
-        blur, 60, 255, cv2.THRESH_BINARY_INV
-        )
+        
+        _, thresh = cv2.threshold(blur, 90, 255, cv2.THRESH_BINARY_INV)
+
         return thresh, roi_y
     
     
     # ------ Core Logic ------
 
     def get_error(self, frame):
-        # Returns: smoothed PID error; raw binary mask 
-
         thresh, roi_y = self.preprocess(frame)
 
         contours, _ = cv2.findContours(
             thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 
-        if not contours:
-            return None, thresh, None
-        
-        # Select largest contour (the line)
-        largest = max(contours, key=cv2.contourArea)
+        turn = None
 
-        # calculates spatial moments of a contour or binary image
+        if not contours:
+            return None, thresh, None, turn,0
+
+        largest = max(contours, key=cv2.contourArea)
+        area = cv2.contourArea(largest)
+        """
+        if area < 300:
+            return None, thresh, None, turn
+        """
+
         M = cv2.moments(largest)
-        if M["m00"] ==0:
-            return None, thresh, None
-        
-        cx = int(M["m10"]/M["m00"])
+        if M["m00"] == 0:
+            return None, thresh, None, turn, 0
+
+        cx = int(M["m10"] / M["m00"])
         error = cx - self.frame_center
 
-        #smooth error using queue
         self.error_queue.append(error)
         error_smoothed = int(np.mean(self.error_queue))
 
-        return error_smoothed, thresh, cx
+        # ---- Turn detection ----
+        if area > 30000:
+            if cx < self.frame_center * 0.75: #240
+                turn = "LEFT"
+            elif cx > self.frame_center * 1.25: #432
+                turn = "RIGHT"
+
+        return error_smoothed, thresh, cx, turn, area
     
     # ------ display ------
     def display(self, frame, cx = None):
