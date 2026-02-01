@@ -61,32 +61,37 @@ def Move(left, right):
 def move_distance(distance, frequency):
 # model constants (from regression)
     # Gradient
-    a = -0.0071198
+    x = 0.05921
 
     # Y-intercept
-    b = 0.431553
+    y = 2.247
     
     #deviation offset
     delta = 0.098
 
     #overshoot factor
-    alpha = 0.10
+    alpha = 0
+
+    #pwm fix on 50% duty cycle
+    pwm_base = 0.5
+
+    #Apply pwm frequency
+    ENA.frequency = frequency
+    ENB.frequency = frequency
 
     #velocity from frequency
-    velocity = a*(frequency/100) +b
+    time_per_1m = x*(frequency/100) + y
+
+    #m/s
+    velocity = 1/time_per_1m 
+
+    #distance compensation
+    distance_cmd = distance-alpha*time_per_1m
+    total_time = distance_cmd * time_per_1m
 
     #PWM from velocity
-    pwm = (velocity - b)/a
-    pwm = max(0.3,min(pwm,0.8))
-
-    #PWM from velocity
-    pwm_L = pwm +delta
-    pwm_R = pwm -delta
-
-    #Distance compensation
-    d_cmd = distance - alpha *velocity
-
-    t_total = d_cmd / velocity
+    pwm_L = pwm_base +delta
+    pwm_R = pwm_base -delta
 
     Move(pwm_L,pwm_R)
 
@@ -99,16 +104,15 @@ def move_distance(distance, frequency):
         
         #print every 0.1 second
         if now - last_print >=0.1:
-            d_travelled = velocity *elapsed
-            d_travelled = min(d_travelled, d_cmd)
+            d_travelled = min(velocity *elapsed,distance_cmd)
 
             print(f"Time: {elapsed: .1f}s | Distance: {d_travelled:.3f} m | Velocity: {velocity:.2f} m/s")
             last_print = now
-        if elapsed >= t_total:
+        if elapsed >= total_time:
             break
         sleep(0.01)
 
     
     Stop()
 
-move_distance(1, 500)
+move_distance(1, 100)
