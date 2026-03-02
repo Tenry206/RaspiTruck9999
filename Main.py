@@ -48,6 +48,58 @@ def set_motor(ENA, IN1, IN2, speed):
         IN2.on()
         ENA.value = abs(speed)
 
+# ------ Stop function ------
+def stop():
+    ENA.off()
+    ENB.off()
+    IN1.off()
+    IN2.off()
+    IN3.off()
+    IN4.off()
+
+# Move function for degree turn
+def Move(left, right):
+    # Stop if both speeds are zero
+    if left == 0 and right == 0:
+        stop()
+        return
+
+    # Left motor backward
+    if left < 0:
+        ENB.value = abs(left)
+        IN1.off()
+        IN2.on()
+    else:
+        ENB.value = left
+        IN1.on()
+        IN2.off()
+
+    # Right motor backward
+    if right < 0:
+        ENA.value = abs(right)
+        IN3.off()
+        IN4.on()
+    else:
+        ENA.value = right
+        IN3.on()
+        IN4.off()
+
+# ------ Turn function ------
+def turn(angle, speed = 0.5, clockwise = True):
+     
+    # Experimentally determined time for 360 degree rotation at speed = 1
+    T_360 = 1.5 #seconds
+
+    # Calculate rotation time
+    turn_time = (angle / 360) * T_360/speed
+
+    if clockwise: 
+        Move(speed, -speed)
+    else:
+        Move(-speed, speed)
+    
+    sleep(turn_time)
+    Move(0,0)
 
 # ------ PID parameters ------
 
@@ -77,18 +129,14 @@ try:
         error, thresh, cx, turn, area = cam.get_error(frame)
         print(area)
         # ------ Sharp 90 turn ------
-
-
         if turn == "LEFT":
             
-            set_motor(ENA, IN1, IN2, -0.4)
-            set_motor(ENB, IN3, IN4, 0.9)
+            turn(90, speed = 0.5, clockwise = True)
             sleep(0.5)
             continue
         elif turn == "RIGHT":
             
-            set_motor(ENA, IN1, IN2, 0.9)
-            set_motor(ENB, IN3, IN4, -0.4)
+            turn(90, speed = 0.5, clockwise = False)
             sleep(0.5)
             continue
 
@@ -149,10 +197,5 @@ try:
 
 finally:
     # Stop motors and camera
-    ENA.off()
-    ENB.off()
-    IN1.off()
-    IN2.off()
-    IN3.off()
-    IN4.off()
+    stop()
     cam.stop()
