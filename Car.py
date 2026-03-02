@@ -44,22 +44,22 @@ def Move(left, right):
     # Left motor backward
     if left < 0:
         ENB.value = abs(left)
-        IN1.off()
-        IN2.on()
+        IN3.off()
+        IN4.on()
     else:
         ENB.value = left
-        IN1.on()
-        IN2.off()
+        IN3.on()
+        IN4.off()
 
     # Right motor backward
     if right < 0:
         ENA.value = abs(right)
-        IN3.off()
-        IN4.on()
+        IN1.off()
+        IN2.on()
     else:
         ENA.value = right
-        IN3.on()
-        IN4.off()
+        IN1.on()
+        IN2.off()
 """
 Turn the robot by a specific angle
     angle: degrees to turn (e.g. 45,60, 90)
@@ -71,7 +71,7 @@ Turn the robot by a specific angle
 def turn(angle, speed = 0.5, clockwise = True):
      
     # Experimentally determined time for 360 degree rotation at speed = 1
-    T_360 = 1.5 #seconds
+    T_360 = 1.6 #seconds
 
     # Calculate rotation time
     turn_time = (angle / 360) * T_360/speed
@@ -84,6 +84,6 @@ def turn(angle, speed = 0.5, clockwise = True):
     sleep(turn_time)
     Move(0,0)
 
-turn(90, speed = 0.5, clockwise = True)
+turn(90, speed = 0.5, clockwise = False)
 
 

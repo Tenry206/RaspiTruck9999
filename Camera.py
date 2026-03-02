@@ -121,9 +121,9 @@ class Camera:
         # ---- Turn detection ----
         if area > 30000:
             if cx < self.frame_center * 0.75: #240
-                turn = "LEFT"
-            elif cx > self.frame_center * 1.25: #432
                 turn = "RIGHT"
+            elif cx > self.frame_center * 1.25: #432
+                turn = "LEFT"
 
         return error_smoothed, thresh, cx, turn, area
     

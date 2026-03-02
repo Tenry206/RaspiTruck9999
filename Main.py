@@ -23,7 +23,7 @@ IN4 = OutputDevice(6)
 # ------ Motor with negative pwm control ------
 
 
-def set_motor(ENA, IN1, IN2, speed):
+def set_motor(motor_pwm, in1, in2, speed):
     # Ensure speed is within -1 to 1 [cite: 61, 62]
     speed = max(min(speed, 1), -1) 
 
@@ -36,13 +36,13 @@ def set_motor(ENA, IN1, IN2, speed):
         adjusted_speed = speed
 
     if adjusted_speed >= 0:
-        IN1.on()
-        IN2.off()
-        ENA.value = adjusted_speed
+        in1.on()
+        in2.off()
+        motor_pwm.value = adjusted_speed
     else:
-        IN1.off()
-        IN2.on()
-        ENA.value = abs(adjusted_speed)
+        in1.off()
+        in2.on()
+        motor_pwm.value = abs(adjusted_speed)
 
 # ------ Stop function ------
 def stop():
@@ -63,25 +63,25 @@ def Move(left, right):
     # Left motor backward
     if left < 0:
         ENB.value = abs(left)
-        IN1.off()
-        IN2.on()
+        IN3.off()
+        IN4.on()
     else:
         ENB.value = left
-        IN1.on()
-        IN2.off()
+        IN3.on()
+        IN4.off()
 
     # Right motor backward
     if right < 0:
         ENA.value = abs(right)
-        IN3.off()
-        IN4.on()
+        IN1.off()
+        IN2.on()
     else:
         ENA.value = right
-        IN3.on()
-        IN4.off()
+        IN1.on()
+        IN2.off()
 
 # ------ Turn function ------
-def turn(angle, speed = 0.5, clockwise = True):
+def Turn(angle, speed = 0.5 , clockwise = True):
      
     # Experimentally determined time for 360 degree rotation at speed = 1
     T_360 = 1.5 #seconds
@@ -125,13 +125,26 @@ try:
         error, thresh, cx, turn, area = cam.get_error(frame)
         print(area)
         # ------ Sharp 90 turn ------
-        if turn == "LEFT":
-            print("Executing Sharp LEft")
-            turn(90, speed = 0.5, clockwise = False)
-            continue
-        elif turn == "RIGHT":
+        if turn == "RIGHT":
             print("Executing Sharp Right")
-            turn(90, speed = 0.5, clockwise = True)
+            Turn(90,speed =  0.5, clockwise = True)
+
+            #Reset PID to prevent integral windup from the sudden jump
+            integral = 0
+            last_error = 0
+
+            cam.display(frame, cx)
+            cv2.waitKey(1)
+            continue
+        elif turn == "LEFT":
+            print("Executing Sharp Left")
+            Turn(90, speed = 0.5, clockwise = False)
+            #Reset PID to prevent integral windup from the sudden jump
+            integral = 0
+            last_error = 0
+
+            cam.display(frame, cx)
+            cv2.waitKey(1)
             continue
 
 
