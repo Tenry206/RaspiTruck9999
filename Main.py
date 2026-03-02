@@ -3,7 +3,7 @@ from time import sleep
 from Camera import Camera
 import cv2
 import numpy as np
-#
+
 
 # ------ Motor A GPIO setup ------
 
@@ -100,9 +100,9 @@ def Turn(angle, speed = 0.5 , clockwise = True):
 # ------ PID parameters ------
 
 
-Kp = 2.56 #4.7  #tu 2.60  ku = 4.7
-Ki = 2.51
-Kd = 0.157
+Kp = 0 #4.7  #tu 2.60  ku = 4.7
+Ki = 0
+Kd = 0
 
 base_speed = 0.4  # duty cycle 0-1
 last_error = 0
@@ -127,7 +127,7 @@ try:
         # ------ Sharp 90 turn ------
         if turn == "RIGHT":
             print("Executing Sharp Right")
-            Turn(90,speed =  0.5, clockwise = True)
+            Turn(70,speed =  0.8, clockwise = True)
 
             #Reset PID to prevent integral windup from the sudden jump
             integral = 0
@@ -138,7 +138,7 @@ try:
             continue
         elif turn == "LEFT":
             print("Executing Sharp Left")
-            Turn(90, speed = 0.5, clockwise = False)
+            Turn(70, speed = 0.8, clockwise = False)
             #Reset PID to prevent integral windup from the sudden jump
             integral = 0
             last_error = 0
