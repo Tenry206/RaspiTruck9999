@@ -100,9 +100,9 @@ def Turn(angle, speed = 0.5 , clockwise = True):
 # ------ PID parameters ------
 
 
-Kp = 0 #4.7  #tu 2.60  ku = 4.7
-Ki = 0
-Kd = 0
+Kp = 2.56 #4.7  #tu 2.60  ku = 4.7
+Ki = 2.51
+Kd = 0.157
 
 base_speed = 0.4  # duty cycle 0-1
 last_error = 0
@@ -155,11 +155,9 @@ try:
             lost_counter += 1
             #print(f"Line lost! Counter: {lost_counter}")
             
-            # Use previous error for PID
-            error = last_error
+            # Use previous error for PIDe
+            current_error = last_error
             
-            # Slow down when lost
-            base_speed_lost = search_speed
             
             # If lost for a while, do a gentle spin to search
             if lost_counter > 20:
@@ -173,15 +171,15 @@ try:
                 continue
         else:
             lost_counter = 0
-            base_speed_lost = base_speed
-        
-        error /= 2.5
+            current_error = error/2.5
 
         # ------ PID calculation ------
-        integral += error * dt
-        derivative = (error - last_error) / dt
-        pid_output = Kp * error + Ki * integral + Kd * derivative
-        last_error = error
+        integral += current_error * dt
+        derivative = (current_error - last_error) / dt
+        pid_output = Kp * current_error + Ki * integral + Kd * derivative
+        
+        #Save the property scaled error for the next loop
+        last_error = current_error
 
         # ------ Compute motor speeds ------
         left_speed = base_speed + pid_output / 1000   # scale PID to 0-1
