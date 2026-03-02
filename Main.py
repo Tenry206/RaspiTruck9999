@@ -24,29 +24,25 @@ IN4 = OutputDevice(6)
 
 
 def set_motor(ENA, IN1, IN2, speed):
+    # Ensure speed is within -1 to 1 [cite: 61, 62]
     speed = max(min(speed, 1), -1) 
 
-    if left_speed < 0.3 and left_speed > 0:
-        adjusted_left_speed = 0.3
-    elif left_speed > -0.3 and left_speed < 0:
-        adjusted_left_speed = -0.3
+    # PWM Dead-zone clamping [cite: 91, 124]
+    if 0 < speed < 0.3:
+        adjusted_speed = 0.3
+    elif -0.3 < speed < 0:
+        adjusted_speed = -0.3
     else:
-        adjusted_left_speed = left_speed
-    if right_speed < 0.3 and right_speed > 0:
-        adjusted_right_speed = 0.3
-    elif right_speed > -0.3 and right_speed < 0:
-        adjusted_right_speed = -0.3
-    else:
-        adjusted_right_speed = right_speed
+        adjusted_speed = speed
 
-    if speed >= 0:
+    if adjusted_speed >= 0:
         IN1.on()
         IN2.off()
-        ENA.value = speed
+        ENA.value = adjusted_speed
     else:
         IN1.off()
         IN2.on()
-        ENA.value = abs(speed)
+        ENA.value = abs(adjusted_speed)
 
 # ------ Stop function ------
 def stop():
@@ -130,14 +126,12 @@ try:
         print(area)
         # ------ Sharp 90 turn ------
         if turn == "LEFT":
-            
-            turn(90, speed = 0.5, clockwise = True)
-            sleep(0.5)
+            print("Executing Sharp LEft")
+            turn(90, speed = 0.5, clockwise = False)
             continue
         elif turn == "RIGHT":
-            
-            turn(90, speed = 0.5, clockwise = False)
-            sleep(0.5)
+            print("Executing Sharp Right")
+            turn(90, speed = 0.5, clockwise = True)
             continue
 
 
