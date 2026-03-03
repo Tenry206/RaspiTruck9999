@@ -119,7 +119,7 @@ class Camera:
         error_smoothed = int(np.mean(self.error_queue))
 
         # ---- Turn detection ----
-        if area > 30000:
+        if area > 17000:
             if cx < self.frame_center * 0.75: #240
                 turn = "RIGHT"
             elif cx > self.frame_center * 1.25: #432

@@ -100,9 +100,9 @@ def Turn(angle, speed = 0.5 , clockwise = True):
 # ------ PID parameters ------
 
 
-Kp = 0 #4.7  #tu 2.60  ku = 4.7
+Kp = 5 #4.7  #tu 2.60  ku = 4.7
 Ki = 0
-Kd = 0
+Kd = 0.4
 
 base_speed = 0.4  # duty cycle 0-1
 last_error = 0
