@@ -22,7 +22,7 @@ templates = {
 w = 20
 h = 20
 
-threshold = 0.75
+threshold = 0.5
 
 while True:
     frame = cam.read()
