@@ -35,7 +35,7 @@ while True:
             resized = cv2.resize(frame_gray, (int(frame_gray.shape[0] * scale), int(frame_gray.shape[1] * scale)))
             r = frame_gray.shape[1] / float(resized.shape[1])
     
-            if resized.shape[0] < w or resized.shape[1] < h:
+            if resized.shape[0] < h or resized.shape[1] < w:
                 break
             else:
                 result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF_NORMED)
