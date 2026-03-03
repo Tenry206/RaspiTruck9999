@@ -24,7 +24,7 @@ threshold = 0.75
 
 
 for symbol_name, template in templates.items():
-    cam.display()
+    cam.display(frame)
     result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
     locations = np.where(result >= threshold)
     print(f"Detected: {symbol_name}")
