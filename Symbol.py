@@ -30,12 +30,13 @@ while True:
     for symbol_name, template in templates.items():
 
         w, h = template.shape[::-1]
-        result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
-        locations = np.where(result >= threshold)
+        if template is None:
+            print("FAILED TO LOAD:", symbol_name)
+            continue
 
-        for pt in zip(*locations[::-1]):
-            cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-            print(f"Symbol name: {symbol_name}")
+        result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        print(f"{symbol_name:12s}  max={max_val:.3f}")
 
     cam.display(frame)
 
