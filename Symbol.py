@@ -27,7 +27,6 @@ while True:
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
-
     for symbol_name, template in templates.items():
 
         w, h = template.shape[::-1]
@@ -42,8 +41,3 @@ while True:
 
     if cv2.waitKey(1) == 27:
         break
-    
-    
-
-
-        
