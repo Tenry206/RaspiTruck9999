@@ -3,7 +3,7 @@ from Camera import Camera
 import numpy as np
 
 
-cam = Camera(resolution=(640,480), fps=60)
+cam = Camera(resolution=(640,480), fps=30)
 
 
 
