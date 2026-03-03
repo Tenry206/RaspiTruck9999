@@ -20,7 +20,7 @@ templates = {
 }
 
 
-threshold = 0.45
+threshold = 0.55
 
 while True:
     frame = cam.read()
