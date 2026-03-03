@@ -33,7 +33,7 @@ class Camera:
         # Position History Queue
         # Include six 0 digit to make sure the array is not empty
         # Keep only the latest 6 measurements, older ones are automatically discarded
-        self.error_queue = deque([0]*6,maxlen = 6)
+        self.error_queue = deque(maxlen = 2)
 
         self.picam2.start()
 
