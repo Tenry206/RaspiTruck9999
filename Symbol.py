@@ -41,7 +41,7 @@ while True:
 
     cam.display(frame)
 
-    if cv2.waitKey(1) == ord('27'):
+    if cv2.waitKey(1) == ord(27):
         break
     
     
