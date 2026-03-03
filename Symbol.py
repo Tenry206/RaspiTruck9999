@@ -4,9 +4,8 @@ import numpy as np
 
 
 cam = Camera(resolution=(640,480), fps=60)
-frame = cam.read()
 
-frame_gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+
 
 templates = {
     'arrow_down': cv2.imread('symbols/arrow_down.png',0),
@@ -20,13 +19,29 @@ templates = {
     'warning': cv2.imread('symbols/warning.png',0),
 }
 
+w = 20
+h = 20
+
 threshold = 0.75
 
+while True:
+    frame = cam.read()
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-for symbol_name, template in templates.items():
-    cam.display(frame)
-    result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
-    locations = np.where(result >= threshold)
-    print(f"Detected: {symbol_name}")
+
+    for symbol_name, template in templates.items():
+
+        w, h = template.shape[::-1]
+        result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
+        locations = np.where(result >= threshold)
+
+        for pt in zip(*locations[::-1]):
+            cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+            print(f"Symbol name: {symbol_name}")
+
+        cam.display(frame)
+    
+    
+
 
         
