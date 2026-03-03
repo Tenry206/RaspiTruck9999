@@ -37,12 +37,13 @@ while True:
     
             if resized.shape[0] < w or resized.shape[1] < h:
                 break
-        result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF_NORMED)
-        locations = np.where(result >= threshold)
+            else:
+                result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF_NORMED)
+                locations = np.where(result >= threshold)
 
-        for pt in zip(*locations[::-1]):
-            cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-            print(f"Symbol name: {symbol_name}")
+                for pt in zip(*locations[::-1]):
+                    cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+                    print(f"Symbol name: {symbol_name}")
 
     cam.display(frame)
 
