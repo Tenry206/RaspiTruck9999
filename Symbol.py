@@ -31,19 +31,12 @@ while True:
     for symbol_name, template in templates.items():
 
         w, h = template.shape[::-1]
-        for scale in np.linspace(0.5, 1.8, 18)[::-1]:
-            resized = cv2.resize(frame_gray, (int(frame_gray.shape[0] * scale), int(frame_gray.shape[1] * scale)))
-            r = frame_gray.shape[1] / float(resized.shape[1])
-    
-            if resized.shape[0] < h or resized.shape[1] < w:
-                break
-            else:
-                result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF_NORMED)
-                locations = np.where(result >= threshold)
+        result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
+        locations = np.where(result >= threshold)
 
-                for pt in zip(*locations[::-1]):
-                    cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-                    print(f"Symbol name: {symbol_name}")
+        for pt in zip(*locations[::-1]):
+            cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+            print(f"Symbol name: {symbol_name}")
 
     cam.display(frame)
 
