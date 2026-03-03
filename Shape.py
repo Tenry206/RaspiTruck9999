@@ -25,13 +25,26 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
 
-    if verts == 4:
-        if 0.9 < ar < 1.1:
+    if verts == 4 and 0.6<C<0.8:
+        if  A<13000:
             return 'Trapisium', ar, A, P, C, verts
-        else:
+        elif A>1300:
             return 'Diamond' ,ar, A, P, C, verts
         
-    return 'Polygon', ar, A, P, C, verts
+    elif verts == 6 and 0.76<C<0.9 :
+        return 'Semicircle', ar, A, P, C, verts
+    elif verts == 8 :
+        if 0.8<C<1.0:
+            return 'Octagon' ,ar, A, P, C, verts
+        elif 0.5<C<0.8:
+            return '3/4 Circle', ar, A, P, C, verts
+    elif verts == 10 and 0.28<C<0.30:
+        return 'Star' ,ar, A, P, C, verts
+    elif verts == 12 and 0.5<C<0.7:
+        return 'Cross' ,ar, A, P, C, verts
+    
+    
+    return 'Noise', ar, A, P, C, verts
 
 def main():
     # 1. Initialize your custom Camera class
@@ -43,13 +56,18 @@ def main():
             # 2. Grab the full, uncropped frame
             frame = cam.read()
             
-            # 3. Process the full frame for shapes (ignoring line-following ROI)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            # 3. Process the full frame for shapes
+            # Convert to HSV color space instead of Grayscale
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            
+            # Extract ONLY the Saturation channel (Index 1)
+            # Colorful things are white, grayscale things (background) become black
+            saturation = hsv[:, :, 1]
+            blurred = cv2.GaussianBlur(saturation, (5, 5), 0)           
             
             # NOTE: If your shapes are black on a white background, use THRESH_BINARY_INV
             # If they are white/light on a dark background, use THRESH_BINARY
-            _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             cv2.imshow("Threshold Mask", thresh)
 
             # 4. Find contours
