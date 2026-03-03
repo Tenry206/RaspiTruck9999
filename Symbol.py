@@ -39,7 +39,10 @@ while True:
             cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
             print(f"Symbol name: {symbol_name}")
 
-        cam.display(frame)
+    cam.display(frame)
+
+    if cv2.waitKey(1) == ord('27'):
+        break
     
     
 
