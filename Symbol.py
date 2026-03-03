@@ -27,9 +27,5 @@ for symbol_name, template in templates.items():
     result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
     locations = np.where(result >= threshold)
 
-pt = zip(*locations[::-1])
-     #   if symbol_name.startswith('arrow'):
-       #    direction = symbol_name.split('_')[1]
-         #   execute_turn(direction)
         
-print(f"Detected: {symbol_name} at {pt}")
+print(f"Detected: {symbol_name}")
