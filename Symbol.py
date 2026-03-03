@@ -32,7 +32,7 @@ while True:
 
         w, h = template.shape[::-1]
         for scale in np.linspace(0.5, 1.8, 18)[::-1]:
-            resized = cv2.resize(frame_gray, width = int(frame_gray.shape[1] * scale))
+            resized = cv2.resize(frame_gray, int(frame_gray.shape[0] * scale), int(frame_gray.shape[1] * scale))
             r = frame_gray.shape[1] / float(resized.shape[1])
     
             if resized.shape[0] < w or resized.shape[1] < h:
