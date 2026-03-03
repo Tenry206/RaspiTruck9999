@@ -19,20 +19,25 @@ templates = {
     'warning': cv2.imread('symbols/warning.png',0),
 }
 
-w = 20
-h = 20
 
-threshold = 0.5
+threshold = 0.75
 
 while True:
     frame = cam.read()
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
+
     for symbol_name, template in templates.items():
 
         w, h = template.shape[::-1]
-        result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
+        for scale in np.linspace(0.5, 1.8, 18)[::-1]:
+            resized = cv2.resize(frame_gray, width = int(frame_gray.shape[1] * scale))
+            r = frame_gray.shape[1] / float(resized.shape[1])
+    
+            if resized.shape[0] < w or resized.shape[1] < h:
+                break
+        result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF_NORMED)
         locations = np.where(result >= threshold)
 
         for pt in zip(*locations[::-1]):
