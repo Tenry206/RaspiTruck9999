@@ -1,7 +1,6 @@
 from gpiozero import OutputDevice, PWMOutputDevice as pwm
 from time import sleep
 from Camera import Camera
-import Symbol
 import cv2
 import numpy as np
 
