@@ -76,13 +76,13 @@ def main():
             for cnt in contours:
                 shape_label, ar, A, P, C, verts = detect_shape(cnt)
                 
-                if shape_label != 'noise':
+                if shape_label != 'Noise':
                     # Draw the bounding polygon
                     eps = 0.03 * cv2.arcLength(cnt, True)
                     approx = cv2.approxPolyDP(cnt, eps, True)
                     cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)
                     
-                    print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
+                print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
             
             # 5. Display the live feed
             cv2.imshow("Shape Detection", frame)
