@@ -16,11 +16,11 @@ while True:
     tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
     vK, vD = orb.detectAndCompute(frame, None)
 
-    matcher = cv2.BFMatcher()
+    matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     matches = matcher.match(tD, vD)
 
     frame2 = cv2.drawMatches(qr, tK, frame, vK, matches[:20], None)
-    
+
     cam.display(frame2)
     
 
