@@ -3,7 +3,12 @@ import numpy as np
 from Camera import Camera
 import math
 
-
+color_ranges = {
+    'Green':  [(30, 80, 150), (60, 120, 170)],
+    'Blue':   [(10, 235, 180), (20, 255, 200)],
+    'Orange': [(90, 180, 200), (110, 200, 220)],
+    'Red':    [(110, 130, 180), (125, 150, 200)]
+}
 
 def detect_shape(cnt):
     A = cv2.contourArea(cnt)
@@ -25,19 +30,26 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
 
-    if verts == 4 and 0.6<C<0.8:
-        if  A<13000:
+    if verts == 4 :
+        if  A<11500 and 0.6<C<0.7:
             return 'Trapisium', ar, A, P, C, verts
-        elif A>1300:
+        elif 0.685<C<0.8:
             return 'Diamond' ,ar, A, P, C, verts
         
-    elif verts == 6 and 0.76<C<0.9 :
-        return 'Semicircle', ar, A, P, C, verts
+    elif verts == 6:
+        if 0.76<C<0.9 :
+            return 'Semicircle', ar, A, P, C, verts
+        elif 0.2<C<0.26:
+            return 'Arrow', ar,A, P, C, verts
+    elif verts == 7 and 0.2<C<0.26 :
+        return 'Arrow', ar, A, P, C, verts
     elif verts == 8 :
         if 0.8<C<1.0:
             return 'Octagon' ,ar, A, P, C, verts
         elif 0.5<C<0.8:
             return '3/4 Circle', ar, A, P, C, verts
+        elif 0.2<C<0.26:
+            return 'Arrow', ar, A, P, C, verts
     elif verts == 10 and 0.28<C<0.30:
         return 'Star' ,ar, A, P, C, verts
     elif verts == 12 and 0.5<C<0.7:
@@ -84,14 +96,36 @@ def main():
             for cnt in contours:
                 shape_label, ar, A, P, C, verts = detect_shape(cnt)
                 
+                mask = np.zeros(saturation.shape, np.uint8)
+                cv2.drawContours(mask, [cnt], -1,255,-1)
+                mean_val = cv2.mean(hsv, mask=mask)
+                h_avg, s_avg, v_avg = int(mean_val[0]), int(mean_val[1]), int(mean_val[2])
+                
+                detected_color = "Unknown"
+                for color_name, (lower, upper) in color_ranges.items():
+                    if lower[0] <= h_avg <= upper[0]:
+                        detected_color = color_name
+                        break
+
                 if shape_label != 'Noise':
                     # Draw the bounding polygon
                     eps = 0.03 * cv2.arcLength(cnt, True)
                     approx = cv2.approxPolyDP(cnt, eps, True)
                     cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)
-                    
-                print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
-            
+                
+                if shape_label == 'Arrow':
+                    if detected_color == 'Red':
+                        print("Down Arrow")
+                    elif detected_color == 'Green':
+                        print("Up Arrow")
+                    elif detected_color == 'Blue':
+                        print("Right Arrow")
+                    elif detected_color == 'Orange':
+                        print("Left Arrow")
+                    else:
+                        print("Noise")
+                else:
+                    print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
             # 5. Display the live feed
             cv2.imshow("Shape Detection", frame)
             
