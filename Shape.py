@@ -8,11 +8,11 @@ import math
 def detect_shape(cnt):
     A = cv2.contourArea(cnt)
     if A <500:
-        return 'noise', 0.0, A, 0.0, 0.0, 0.0
+        return 'Noise', 0.0, A, 0.0, 0.0, 0.0
     
     P = cv2.arcLength(cnt, True)
     if P == 0:
-        return 'noise', 0.0, A,P,0.0, 0.0
+        return 'Noise', 0.0, A,P,0.0, 0.0
     
     C = 4*np.pi * A / (P**2)
 
@@ -70,6 +70,30 @@ def main():
             _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             cv2.imshow("Threshold Mask", thresh)
 
+            # create kernel
+            initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            centers = []
+            for cnt in initial_contours:
+                if cv2.contourArea(cnt) >300:
+                    M = cv2.moments(cnt)
+                    if M['m00']!= 0:
+                        cx = int(M['m10']/M['m00'])
+                        cy = int(M['m01']/M['m00'])
+                        centers.append((cx,cy))
+            
+            #Distance between seperate shape
+            MAX_DISTANCE = 100
+
+            for i in range(len(centers)):
+                for j in range(i+1, len(centers)):
+                    dist = math.hypot(centers[i][0]-centers[j][0], centers[i][1] - centers[j][1])
+
+                    if dist <MAX_DISTANCE:
+                        cv2.line(thresh, centers[i], centers[j], 255, thickness = 6)
+            
+            cv2.imshow("Linked Threshold Mask", thresh)
+            
             # 4. Find contours
             contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
