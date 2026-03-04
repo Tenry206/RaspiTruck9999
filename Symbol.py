@@ -8,7 +8,9 @@ qr = cv2.imread('symbols/qr.png')
 qr = cv2.cvtColor(qr, cv2.COLOR_BGR2GRAY)
 orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15)
 tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
-matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
+
+ratio = 0.75
 
 while True:
 
@@ -24,13 +26,25 @@ while True:
             break
         continue
 
-    matches = matcher.match(tD, vD)
+    
+    knn = matcher.knnMatch(tD, vD, k=2)
 
-    frame2 = cv2.drawMatches(qr, tK, frame, vK, matches[:20], None)
+    good = []
+    for pair in knn:
+        if len(pair) < 2:
+            continue
+        m, n = pair
+        # Lowe's ratio test
+        if m.distance < ratio * n.distance:
+            good.append(m)
+
+    good = sorted(good, key=lambda m: m.distance)
+
+    frame2 = cv2.drawMatches(qr, tK, frame, vK, good[:20], None)
 
     #matches = sorted(matches, key=lambda val: val.distance)
 
-    matchesNum = len(matches)
+    matchesNum = len(good)
 
     print(f"{str(matchesNum)}")
     cam.display(frame2)
