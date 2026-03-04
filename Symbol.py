@@ -4,18 +4,25 @@ from Camera import Camera
 
 cam = Camera(resolution=(640,480), fps=60)
 
-while True:
-    
-    frame = cam.read()
+qr = cv2.imread('symbols/qr.png')
+qr = cv2.cvtColor(qr, cv2.COLOR_BGR2GRAY)
 
+while True:
+
+    frame = cam.read()
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     orb = cv2.ORB_create()
 
-    kp = orb.detect(frame, None)
-    kp, des = orb.compute(frame, kp)
+    tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
+    vK, vD = orb.detectAndCompute(frame, None)
 
-    frame2 = cv2.drawKeypoints(frame, kp, None, color=(0,255,0), flags=0)
+    matcher = cv2.BFMatcher()
+    matches = matcher.match(tD, vD)
 
+    frame2 = cv2.drawMatches(qr, tK, frame, vK, matches[:20], None)
+    
     cam.display(frame2)
+    
 
     if cv2.waitKey(1) == 27:
         break
