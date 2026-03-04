@@ -23,11 +23,16 @@ while True:
         if cv2.waitKey(1) == 27:
             break
         continue
-    
+
     matches = matcher.match(tD, vD)
 
     frame2 = cv2.drawMatches(qr, tK, frame, vK, matches[:20], None)
 
+    matches = sorted(matches, key=lambda val: val.distance)
+
+    matchesNum = len(matches)
+    
+    print(f"{str(matchesNum)}")
     cam.display(frame2)
     
 
