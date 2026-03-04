@@ -4,7 +4,7 @@ from Camera import Camera
 
 cam = Camera(resolution=(640,480), fps=60)
 
-qr = cv2.imread('symbols/qr.png')
+qr = cv2.imread('symbols/warning.png')
 qr = cv2.cvtColor(qr, cv2.COLOR_BGR2GRAY)
 orb = cv2.ORB_create()
 tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
@@ -31,7 +31,7 @@ while True:
     matches = sorted(matches, key=lambda val: val.distance)
 
     matchesNum = len(matches)
-    
+
     print(f"{str(matchesNum)}")
     cam.display(frame2)
     
