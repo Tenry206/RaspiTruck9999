@@ -100,12 +100,12 @@ def Turn(angle, speed = 0.5 , clockwise = True):
 # ------ PID parameters ------
 
 
-Kp = 5 #4.7  #tu 2.60  ku = 4.7
+Kp = 10.4 #kp = 5 , kd = 0.4; kp = 7, kd = 0.4q
 Ki = 0
-Kd = 0.4
+Kd = 0.37
 
 
-base_speed = 0.4  # duty cycle 0-1
+base_speed = 0.5  # duty cycle 0-1
 last_error = 0
 integral = 0
 dt = 0.02  # control loop 50 Hz
@@ -126,9 +126,10 @@ try:
         error, thresh, cx, turn, area = cam.get_error(frame)
         print(area)
         # ------ Sharp 90 turn ------
+        '''
         if turn == "RIGHT":
             print("Executing Sharp Right")
-            Turn(40,speed =  0.6, clockwise = True)
+            Turn(50,speed =  0.6, clockwise = True)
 
             #Reset PID to prevent integral windup from the sudden jump
             integral = 0
@@ -139,7 +140,7 @@ try:
             continue
         elif turn == "LEFT":
             print("Executing Sharp Left")
-            Turn(40, speed = 0.6, clockwise = False)
+            Turn(50, speed = 0.6, clockwise = False)
             #Reset PID to prevent integral windup from the sudden jump
             #integral = 0
             #last_error = 0
@@ -147,7 +148,7 @@ try:
             cam.display(frame, cx)
             cv2.waitKey(1)
             continue
-
+        '''
 
         # ------ Handle line lost ------
 
