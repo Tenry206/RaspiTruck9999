@@ -4,7 +4,7 @@ from Camera import Camera
 
 cam = Camera(resolution=(640,480), fps=60)
 
-qr = cv2.imread('symbols/qr.png')
+qr = cv2.imread('symbols/arrow_right.png')
 qr = cv2.cvtColor(qr, cv2.COLOR_BGR2GRAY)
 orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15)
 tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
@@ -51,6 +51,7 @@ while True:
 
     inliers = 0
     H = None
+    mask = None
     inlier_matches = []
 
     if matchesNum >= MIN_GOOD:
