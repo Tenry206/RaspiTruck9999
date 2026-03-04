@@ -68,7 +68,7 @@ def main():
             # NOTE: If your shapes are black on a white background, use THRESH_BINARY_INV
             # If they are white/light on a dark background, use THRESH_BINARY
             _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-            cv2.imshow("Threshold Mask", thresh)
+
 
             # create kernel
             initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
