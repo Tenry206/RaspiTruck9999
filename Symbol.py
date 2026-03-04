@@ -63,6 +63,8 @@ while True:
         mask = mask.ravel().astype(bool)
         inliers = int(mask.sum())
         inlier_matches = [good[i] for i in range(len(good)) if mask[i]]
+    else:
+        continue
 
     print(f"good={matchesNum}, inliers={inliers}")
 
