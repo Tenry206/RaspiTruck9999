@@ -28,7 +28,7 @@ while True:
 
     frame2 = cv2.drawMatches(qr, tK, frame, vK, matches[:20], None)
 
-    matches = sorted(matches, key=lambda val: val.distance)
+    #matches = sorted(matches, key=lambda val: val.distance)
 
     matchesNum = len(matches)
 
