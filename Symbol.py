@@ -10,7 +10,7 @@ orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15)
 tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 
-ratio = 0.75
+ratio = 0.7
 
 while True:
 
@@ -34,7 +34,7 @@ while True:
         if len(pair) < 2:
             continue
         m, n = pair
-        # Lowe's ratio test
+
         if m.distance < ratio * n.distance:
             good.append(m)
 
