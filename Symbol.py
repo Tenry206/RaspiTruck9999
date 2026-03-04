@@ -6,7 +6,7 @@ cam = Camera(resolution=(640,480), fps=60)
 
 qr = cv2.imread('symbols/warning.png')
 qr = cv2.cvtColor(qr, cv2.COLOR_BGR2GRAY)
-orb = cv2.ORB_create()
+orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15)
 tK, tD = orb.detectAndCompute(qr, None) # tK for template keypoints and d for descriptor
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
