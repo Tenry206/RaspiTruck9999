@@ -3,7 +3,7 @@ from time import sleep
 from Camera import Camera
 import cv2
 import numpy as np
-from Symbol import symbol_detect
+from Symbol import symbol_detect, build_templatesF
 
 # ------ Templates ------
 
@@ -130,6 +130,13 @@ cam = Camera(resolution=(640,480), fps=60)
 lost_counter = 0
 search_speed = 0.7
 counter = 0
+
+orb = cv2.ORB_create(nfeatures=4000, fastThreshold=12)
+matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
+templatesF = build_templatesF(templates, orb)
+
+symbol_cooldown = 0
+
  #0.8
 try:
     while True:
@@ -138,12 +145,18 @@ try:
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         counter += 1
         symbol = None
-        if counter % 5 == 0:
-            symbol = symbol_detect(frame_gray, templates)
-            if symbol is not None:
-                stop()
-                print(symbol)
-                continue
+
+        if symbol_cooldown > 0:
+            symbol_cooldown -= 1
+        elif counter % 5 == 0:
+            symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
+
+        if symbol is not None:
+            stop()
+            print(symbol)
+            symbol_cooldown = 60   # ignore symbols for ~1 sec at 60fps
+            continue
+
         error, thresh, cx, turn, area = cam.get_error(frame)
         #print(area)
         # ------ Sharp 90 turn ------

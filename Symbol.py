@@ -1,44 +1,29 @@
 import numpy as np
 import cv2
 
-def symbol_detect(frame, templates):
-
-    orb = cv2.ORB_create(nfeatures=4000, fastThreshold=12)
-
-    matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
-
-
-    RATIO = 0.8
-
-    MIN_GOOD = 12
-    MIN_INLIER = 15
-    RANSAC_THRESH = 5.0
-
+def build_templatesF(templates, orb):
     templatesF = {}
     for name, img in templates.items():
         if img is None:
-            print("Epic fail")
             continue
-        tK, tD = orb.detectAndCompute(img, None)
-        templatesF[name] = {"img": img, "kps": tK, "des": tD}
+        k, d = orb.detectAndCompute(img, None)
+        templatesF[name] = {"kps": k, "des": d}
+    return templatesF
 
+def symbol_detect(frame_gray, templatesF, orb, matcher,
+                  RATIO=0.8, MIN_GOOD=12, MIN_INLIER=15, RANSAC_THRESH=5.0):
 
-
-    vK, vD = orb.detectAndCompute(frame, None)
+    vK, vD = orb.detectAndCompute(frame_gray, None)
+    if vD is None or len(vD) < 2:
+        return None
 
     best_name = None
-    best_tpl = None
     best_good = 0
     best_inliers = 0
     best_H = None
-    best_inlier_matches = []
-    best_tK = None
 
     for name, tpl in templatesF.items():
-        tK = tpl["kps"]
-        tD = tpl["des"]
-        img = tpl["img"]
-
+        tK, tD = tpl["kps"], tpl["des"]
         if tD is None or len(tD) < 2:
             continue
 
@@ -49,50 +34,26 @@ def symbol_detect(frame, templates):
             if len(pair) < 2:
                 continue
             m, n = pair
-
             if m.distance < RATIO * n.distance:
                 good.append(m)
 
-        good = sorted(good, key=lambda m: m.distance)
+        if len(good) < MIN_GOOD:
+            continue
 
+        src_pts = np.float32([tK[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+        dst_pts = np.float32([vK[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-        #matches = sorted(matches, key=lambda val: val.distance)
+        H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, RANSAC_THRESH)
+        if H is None or mask is None:
+            continue
 
-        matchesNum = len(good)
+        inliers = int(mask.ravel().sum())
 
-        inliers = 0
-        H = None
-        mask = None
-        inlier_matches = []
-
-        if matchesNum >= MIN_GOOD:
-            src_pts = np.float32([tK[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
-            dst_pts = np.float32([vK[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
-
-            H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, RANSAC_THRESH)
-
-        if mask is not None and H is not None:
-            mask = mask.ravel().astype(bool)
-            inliers = int(mask.sum())
-            inlier_matches = [good[i] for i in range(len(good)) if mask[i]]
-
-        if (inliers > best_inliers) or (inliers == best_inliers and matchesNum > best_good):
+        if (inliers > best_inliers) or (inliers == best_inliers and len(good) > best_good):
             best_name = name
-            best_tpl = img
-            best_tK = tK
-            best_good = matchesNum
+            best_good = len(good)
             best_inliers = inliers
             best_H = H
-            best_inlier_matches = inlier_matches
 
-        detected = (H is not None) and (inliers >= MIN_INLIER)
-
-
-        show = inlier_matches if detected else good
-        show = sorted(show, key=lambda m: m.distance)
-
-        vis = cv2.drawMatches(best_tpl, tK, frame, vK, show[:30], None, flags=2)
-
-        #cam.display(vis)
-
-    return best_name
+    detected = (best_H is not None) and (best_inliers >= MIN_INLIER) and (best_good >= MIN_GOOD)
+    return best_name if detected else None
