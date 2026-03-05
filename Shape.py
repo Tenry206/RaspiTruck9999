@@ -41,8 +41,13 @@ def detect_shape(cnt):
             return 'Semicircle', ar, A, P, C, verts
         elif 0.2<C<0.26:
             return 'Arrow', ar,A, P, C, verts
-    elif verts == 7 and 0.2<C<0.26 :
-        return 'Arrow', ar, A, P, C, verts
+    elif verts == 7:
+        if 0.2<C<0.26:
+            return 'Arrow', ar, A, P, C, verts
+        elif 0.5<C<0.8:
+            return '3/4 Circle', ar, A, P, C, verts
+        elif 0.76<C<0.9:
+            return 'Semicircle',ar, A, P, C, verts
     elif verts == 8 :
         if 0.8<C<1.0:
             return 'Octagon' ,ar, A, P, C, verts
@@ -50,7 +55,7 @@ def detect_shape(cnt):
             return '3/4 Circle', ar, A, P, C, verts
         elif 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
-    elif verts == 10 and 0.28<C<0.30:
+    elif verts == 10 and 0.25<C<0.30:
         return 'Star' ,ar, A, P, C, verts
     elif verts == 12 and 0.5<C<0.7:
         return 'Cross' ,ar, A, P, C, verts
