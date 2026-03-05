@@ -3,14 +3,6 @@ import cv2
 
 def symbol_detect(frame):
 
-    templates = {
-        'button': cv2.imread('symbols/button.png', 0),
-        'fingerprint': cv2.imread('symbols/fingerprint.png', 0),
-        'qr': cv2.imread('symbols/qr.png', 0),
-        'recycle': cv2.imread('symbols/recycle.png', 0),
-        'warning': cv2.imread('symbols/warning.png', 0),
-    }
-
     orb = cv2.ORB_create(nfeatures=4000, fastThreshold=12)
 
     matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
