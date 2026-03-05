@@ -58,6 +58,44 @@ def detect_shape(cnt):
     
     return 'Noise', ar, A, P, C, verts
 
+def process_shapes(frame):
+    """Processes a frame to detect shapes and colors."""
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    saturation = hsv[:, :, 1]
+    blurred = cv2.GaussianBlur(saturation, (5, 5), 0)           
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Re-include your Centroid Linking logic here if needed for QR codes
+
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    results = []
+    for cnt in contours:
+        shape_label, ar, area, perim, circ, verts = detect_shape(cnt)
+        
+        if shape_label != 'Noise':
+            # Color detection logic
+            mask = np.zeros(saturation.shape, np.uint8)
+            cv2.drawContours(mask, [cnt], -1, 255, -1)
+            mean_val = cv2.mean(hsv, mask=mask)
+            h_avg = int(mean_val[0])
+            
+            detected_color = "Unknown"
+            for color_name, (lower, upper) in color_ranges.items():
+                if lower[0] <= h_avg <= upper[0]:
+                    detected_color = color_name
+                    break
+            
+            if shape_label == "Arrow" and detected_color == "Unknown"
+                shape_label = 'Noise'
+                
+            results.append({
+                'label': shape_label,
+                'color': detected_color,
+                'contour': cnt
+            })
+    return results, thresh
+'''
 def main():
     # 1. Initialize your custom Camera class
     print("Initializing Camera...")
@@ -142,3 +180,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
