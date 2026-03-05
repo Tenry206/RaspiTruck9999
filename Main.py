@@ -179,20 +179,16 @@ try:
         # ------ PID calculation ------
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
-        pid_output = Kp * current_error + Ki * integral + Kd * derivative + speed_boost
+        pid_output = Kp * current_error + Ki * integral + Kd * derivative
         
-        if abs(derivative) > 1000:
-            speed_boost = 0.3 * derivative
-
         #Save the property scaled error for the next loop
         last_error = current_error
-
 
         # ------ Compute motor speeds ------
         left_speed = base_speed + pid_output / 1000   # scale PID to 0-1
         right_speed = base_speed - pid_output / 1000
 
-
+    
         # ------ Set motor directions ------
         set_motor(ENA, IN1, IN2, left_speed)
         set_motor(ENB, IN3, IN4, right_speed)
