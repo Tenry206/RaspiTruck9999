@@ -4,7 +4,7 @@ from Camera import Camera
 
 cam = Camera(resolution=(640,480), fps=60)
 
-def symbol_detect():
+def symbol_detect(frame):
 
     templates = {
         'button': cv2.imread('symbols/button.png', 0),
@@ -36,14 +36,12 @@ def symbol_detect():
 
     while True:
 
-        frame = cam.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
 
         vK, vD = orb.detectAndCompute(frame, None)
 
         if tD is None or vD is None or len(tD) == 0 or len(vD) == 0:
-            cam.display(frame)
+            #cam.display(frame)
             if cv2.waitKey(1) == 27:
                 break
             continue
@@ -121,7 +119,7 @@ def symbol_detect():
 
         vis = cv2.drawMatches(best_tpl, tK, frame, vK, show[:30], None, flags=2)
 
-        cam.display(vis)
+        #cam.display(vis)
 
         if cv2.waitKey(1) == 27:
             break

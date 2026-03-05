@@ -125,6 +125,8 @@ try:
         # ---- Capture frame and get error ----
         frame = cam.read()
         error, thresh, cx, turn, area = cam.get_error(frame)
+        symbol = symbol_detect()
+        print(symbol)
         #print(area)
         # ------ Sharp 90 turn ------
         '''
@@ -189,8 +191,6 @@ try:
         left_speed = base_speed + pid_output / 1000   # scale PID to 0-1
         right_speed = base_speed - pid_output / 1000
 
-        symbol = symbol_detect()
-        print(symbol)
         # ------ Set motor directions ------
         set_motor(ENA, IN1, IN2, left_speed)
         set_motor(ENB, IN3, IN4, right_speed)
