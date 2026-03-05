@@ -37,12 +37,6 @@ def symbol_detect(frame):
 
         vK, vD = orb.detectAndCompute(frame_gray, None)
 
-        if tD is None or vD is None or len(tD) == 0 or len(vD) == 0:
-            #cam.display(frame)
-            if cv2.waitKey(1) == 27:
-                break
-            continue
-
         best_name = None
         best_tpl = None
         best_good = 0
@@ -104,10 +98,6 @@ def symbol_detect(frame):
 
         detected = (H is not None) and (inliers >= MIN_INLIER)
 
-        if best_name is None:
-            if cv2.waitKey(1) == 27:
-                break
-            continue
 
         show = inlier_matches if detected else good
         show = sorted(show, key=lambda m: m.distance)
@@ -115,8 +105,5 @@ def symbol_detect(frame):
         vis = cv2.drawMatches(best_tpl, tK, frame, vK, show[:30], None, flags=2)
 
         #cam.display(vis)
-
-        if cv2.waitKey(1) == 27:
-            break
 
     return best_name
