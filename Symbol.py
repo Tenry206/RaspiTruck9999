@@ -1,8 +1,5 @@
 import numpy as np
 import cv2
-from Camera import Camera
-
-cam = Camera(resolution=(640,480), fps=60)
 
 def symbol_detect(frame):
 
@@ -36,9 +33,9 @@ def symbol_detect(frame):
 
     while True:
 
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        vK, vD = orb.detectAndCompute(frame, None)
+        vK, vD = orb.detectAndCompute(frame_gray, None)
 
         if tD is None or vD is None or len(tD) == 0 or len(vD) == 0:
             #cam.display(frame)
@@ -106,10 +103,8 @@ def symbol_detect(frame):
                 best_inlier_matches = inlier_matches
 
         detected = (H is not None) and (inliers >= MIN_INLIER)
-        print(f"{best_name}")
 
         if best_name is None:
-            cam.display(frame)
             if cv2.waitKey(1) == 27:
                 break
             continue
