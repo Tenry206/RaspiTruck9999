@@ -124,7 +124,7 @@ try:
         # ---- Capture frame and get error ----
         frame = cam.read()
         error, thresh, cx, turn, area = cam.get_error(frame)
-        print(area)
+        
         # ------ Sharp 90 turn ------
         '''
         if turn == "RIGHT":
@@ -180,9 +180,11 @@ try:
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
         speed_boost = 0
-        if abs(derivative) > 1000:
-            speed_boost = 0.3 * derivative
-
+        print(derivative)
+        if abs(derivative) > 3000:
+            speed_boost = 0.2 * derivative
+        if speed_boost:
+            print("im boosting")
         pid_output = Kp * current_error + Ki * integral + Kd * derivative + speed_boost
         
 

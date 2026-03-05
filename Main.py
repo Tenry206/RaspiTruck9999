@@ -28,10 +28,10 @@ def set_motor(motor_pwm, in1, in2, speed):
     speed = max(min(speed, 1), -1) 
 
     # PWM Dead-zone clamping [cite: 91, 124]
-    if 0 < speed < 0.3:
-        adjusted_speed = 0.3
-    elif -0.3 < speed < 0:
-        adjusted_speed = -0.3
+    if 0 < speed < 0.4:
+        adjusted_speed = 0.4
+    elif -0.4 < speed < 0:
+        adjusted_speed = -0.4
     else:
         adjusted_speed = speed
 
@@ -100,10 +100,10 @@ def Turn(angle, speed = 0.5 , clockwise = True):
 # ------ PID parameters ------
 
 
-Kp = 11.7 #kp = 5 , kd = 0.4; kp = 7, kd = 0.4q
+Kp = 11.6 #kp = 5 , kd = 0.4; kp = 7, kd = 0.4q
 Ki = 0
-Kd = 0.37
-
+Kd = 0.36
+#11.7
 
 base_speed = 0.7  # duty cycle 0-1
 last_error = 0
@@ -117,8 +117,8 @@ dt = 0.02  # control loop 50 Hz
 cam = Camera(resolution=(640,480), fps=60)
 
 lost_counter = 0
-search_speed = 0.8
-
+search_speed = 0.7
+ #0.8
 try:
     while True:
         # ---- Capture frame and get error ----
@@ -163,12 +163,12 @@ try:
             
             
             # If lost for a while, do a gentle spin to search
-            if lost_counter > 3:
+            if lost_counter > 0: #3
                 if last_error >= 0:
-                    set_motor(ENA, IN1, IN2, search_speed)
-                    set_motor(ENB, IN3, IN4, -search_speed)
+                    set_motor(ENA, IN1, IN2, search_speed) 
+                    set_motor(ENB, IN3, IN4, -search_speed+0.175) # search speed negative 
                 else:
-                    set_motor(ENA, IN1, IN2, -search_speed)
+                    set_motor(ENA, IN1, IN2, -search_speed+0.175)
                     set_motor(ENB, IN3, IN4, search_speed)
                 sleep(dt)
                 continue

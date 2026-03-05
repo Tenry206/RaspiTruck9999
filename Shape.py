@@ -32,7 +32,7 @@ def detect_shape(cnt):
 
     if verts == 4 :
         if  A<11500 and 0.6<C<0.7:
-            return 'Trapisium', ar, A, P, C, verts
+            return 'Trapezium', ar, A, P, C, verts
         elif 0.685<C<0.8:
             return 'Diamond' ,ar, A, P, C, verts
         
