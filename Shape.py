@@ -31,11 +31,13 @@ def detect_shape(cnt):
     ar = w/float(h)
 
     if verts == 4 :
-        if  A<11500 and 0.6<C<0.7:
+        if  A<13700 and 0.6<C<0.7:
             return 'Trapezium', ar, A, P, C, verts
         elif 0.685<C<0.8:
             return 'Diamond' ,ar, A, P, C, verts
-        
+    elif verts == 5:
+        if 0.3<C<0.6:
+            return 'Diamond', ar, A, P, C, verts    
     elif verts == 6:
         if 0.76<C<0.9 :
             return 'Semicircle', ar, A, P, C, verts
@@ -66,15 +68,22 @@ def detect_shape(cnt):
 def process_shapes(frame):
     """Processes a frame to detect shapes and colors."""
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    saturation = hsv[:, :, 1]
-    blurred = cv2.GaussianBlur(saturation, (5, 5), 0)
+    #saturation = hsv[:, :, 1]
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(cliplimit = 3.0, tileGridSize = (8,8))
+    gray_enhanced = clahe.apply(gray)
+    blurred = cv2.GaussianBlur(gray_enhanced, (5, 5), 0)
     
     # if background too bright just ignore
-    if np.max(blurred) < 70:  # You may need to tune '50' between 30 and 80
-        return [], np.zeros_like(blurred)
+    if np.std(gray_enhanced) < 5:  # You may need to tune '50' between 30 and 80
+        return [], np.zeros_like(gray)
 
 
     _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # kernel
+    kernel = np.ones((9,9),np.uint8)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
     # Re-include your Centroid Linking logic here if needed for QR codes
 
