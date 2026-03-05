@@ -134,7 +134,7 @@ try:
     while True:
         # ---- Capture frame and get error ----
         frame = cam.read()
-        symbol = symbol_detect(frame)
+        symbol = symbol_detect(frame, templates)
         error, thresh, cx, turn, area = cam.get_error(frame)
         print(symbol)
         #print(area)

@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-def symbol_detect(frame):
+def symbol_detect(frame, templates):
 
     orb = cv2.ORB_create(nfeatures=4000, fastThreshold=12)
 
