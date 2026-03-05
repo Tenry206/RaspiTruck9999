@@ -68,13 +68,13 @@ def process_shapes(frame):
     # Re-include your Centroid Linking logic here if needed for QR codes
 
     initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    center = []
+    centers = []
     
-    for cnt in intial_contours:
+    for cnt in initial_contours:
         if cv2.contourArea(cnt) > 300:
             M = cv2.moments(cnt)
-            if M['m00']! = 0:
-            centers.append((intM['m10']/M['m00']), int(M['m01']/M['m00'])))
+            if M['m00']!= 0:
+                centers.append((int(M['m10']/M['m00']), int(M['m01']/M['m00'])))
     
     for i in range(len(centers)):
         for j in range(i+1, len(centers)):
@@ -86,7 +86,9 @@ def process_shapes(frame):
     results = []
     for cnt in contours:
         shape_label, ar, area, perim, circ, verts = detect_shape(cnt)
-        
+        direction = "None"
+        detected_color = "Unknown"
+
         if shape_label != 'Noise':
             # Color detection logic
             mask = np.zeros(saturation.shape, np.uint8)
@@ -94,7 +96,7 @@ def process_shapes(frame):
             mean_val = cv2.mean(hsv, mask=mask)
             h_avg = int(mean_val[0])
             
-            detected_color = "Unknown"
+            
             for color_name, (lower, upper) in color_ranges.items():
                 if lower[0] <= h_avg <= upper[0]:
                     detected_color = color_name
