@@ -179,8 +179,10 @@ try:
         # ------ PID calculation ------
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
+        speed_boost = 0
         if abs(derivative) > 1000:
             speed_boost = 0.3 * derivative
+
         pid_output = Kp * current_error + Ki * integral + Kd * derivative + speed_boost
         
 
