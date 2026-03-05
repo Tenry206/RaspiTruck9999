@@ -95,4 +95,4 @@ def symbol_detect(frame, templates):
 
         #cam.display(vis)
 
-    return best_name
+    return best_name if detected else None

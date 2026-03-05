@@ -129,15 +129,22 @@ cam = Camera(resolution=(640,480), fps=60)
 
 lost_counter = 0
 search_speed = 0.7
+counter = 0
  #0.8
 try:
     while True:
         # ---- Capture frame and get error ----
         frame = cam.read()
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        symbol = symbol_detect(frame_gray, templates)
+        counter += 1
+        symbol = None
+        if counter % 5 == 0:
+            symbol = symbol_detect(frame_gray, templates)
+            if symbol is not None:
+                stop()
+                print(symbol)
+                continue
         error, thresh, cx, turn, area = cam.get_error(frame)
-        print(symbol)
         #print(area)
         # ------ Sharp 90 turn ------
         '''
