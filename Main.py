@@ -131,7 +131,7 @@ lost_counter = 0
 search_speed = 0.7
 counter = 0
 
-orb = cv2.ORB_create(nfeatures=4000, fastThreshold=12)
+orb = cv2.ORB_create(nfeatures=1500, fastThreshold=25)
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
 
