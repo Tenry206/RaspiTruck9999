@@ -67,8 +67,22 @@ def process_shapes(frame):
 
     # Re-include your Centroid Linking logic here if needed for QR codes
 
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    center = []
     
+    for cnt in intial_contours:
+        if cv2.contourArea(cnt) > 300:
+            M = cv2.moments(cnt)
+            if M['m00']! = 0:
+            centers.append((intM['m10']/M['m00']), int(M['m01']/M['m00'])))
+    
+    for i in range(len(centers)):
+        for j in range(i+1, len(centers)):
+            if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < 80:
+                cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
+    
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
     results = []
     for cnt in contours:
         shape_label, ar, area, perim, circ, verts = detect_shape(cnt)
@@ -83,9 +97,11 @@ def process_shapes(frame):
             detected_color = "Unknown"
             for color_name, (lower, upper) in color_ranges.items():
                 if lower[0] <= h_avg <= upper[0]:
-                    detected_color = color_names
+                    detected_color = color_name
                     break
-
+            
+            if shape_label == "Arrow" and detected_color == "Unknown":
+                shape_label = 'Noise'
                 
             results.append({
                 'label': shape_label,
