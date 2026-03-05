@@ -135,7 +135,7 @@ try:
         # ---- Capture frame and get error ----
         frame = cam.read()
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        symbol = symbol_detect(frame, templates)
+        symbol = symbol_detect(frame_gray, templates)
         error, thresh, cx, turn, area = cam.get_error(frame)
         print(symbol)
         #print(area)
