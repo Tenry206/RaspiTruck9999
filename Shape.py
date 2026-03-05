@@ -68,23 +68,35 @@ def detect_shape(cnt):
 def process_shapes(frame):
     """Processes a frame to detect shapes and colors."""
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    #saturation = hsv[:, :, 1]
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    clahe = cv2.createCLAHE(cliplimit = 3.0, tileGridSize = (8,8))
-    gray_enhanced = clahe.apply(gray)
-    blurred = cv2.GaussianBlur(gray_enhanced, (5, 5), 0)
+    saturation = hsv[:, :, 1]
+    blur_sat = cv2.GaussianBlur(saturation, (5, 5), 0)
+    blur_gray = cv2. GaussianBlur(gray, (5,5),0)
     
     # if background too bright just ignore
-    if np.std(gray_enhanced) < 5:  # You may need to tune '50' between 30 and 80
-        return [], np.zeros_like(gray)
+    '''
+    if np.max(blurred) < 15:  # You may need to tune '50' between 30 and 80
+        return [], np.zeros_like(blurred)
+    '''
 
 
-    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, mask_color = cv2.threshold(blur_sat, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, mask_dark = cv2.threshold(blur_gray, 150, 255, cv2.THRESH_BINARY_INV)
 
-    # kernel
-    kernel = np.ones((9,9),np.uint8)
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    thresh = cv2.bitwise_or(mask_color, mask_dark)
 
+    #roi
+    thresh[:, :120] = 0  
+    thresh[:, 500:] = 0  
+    # Optionally, ignore the very top of the frame too
+    thresh[:50, :] = 0   
+    # ------------------------------------------------
+
+    # 5. Shape Glue
+    kernel = np.ones((5,5), np.uint8)
+
+    kernel = np.ones((5,5),np.uint8)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE,kernel)
     # Re-include your Centroid Linking logic here if needed for QR codes
 
     initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -249,6 +261,7 @@ def main():
                         print("Noise")
                 else:
                     print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
+            print(h_avg, s_avg, v_avg)
             # 5. Display the live feed
             cv2.imshow("Shape Detection", frame)
             
