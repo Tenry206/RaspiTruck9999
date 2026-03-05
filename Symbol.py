@@ -31,70 +31,69 @@ def symbol_detect(frame):
         templatesF[name] = {"img": img, "kps": tK, "des": tD}
 
 
-    while True:
 
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        vK, vD = orb.detectAndCompute(frame_gray, None)
+    vK, vD = orb.detectAndCompute(frame_gray, None)
 
-        best_name = None
-        best_tpl = None
-        best_good = 0
-        best_inliers = 0
-        best_H = None
-        best_inlier_matches = []
-        best_tK = None
+    best_name = None
+    best_tpl = None
+    best_good = 0
+    best_inliers = 0
+    best_H = None
+    best_inlier_matches = []
+    best_tK = None
 
-        for name, tpl in templatesF.items():
-            tK = tpl["kps"]
-            tD = tpl["des"]
-            img = tpl["img"]
+    for name, tpl in templatesF.items():
+        tK = tpl["kps"]
+        tD = tpl["des"]
+        img = tpl["img"]
 
-            if tD is None or len(tD) < 2:
+        if tD is None or len(tD) < 2:
+            continue
+
+        knn = matcher.knnMatch(tD, vD, k=2)
+
+        good = []
+        for pair in knn:
+            if len(pair) < 2:
                 continue
+            m, n = pair
 
-            knn = matcher.knnMatch(tD, vD, k=2)
+            if m.distance < RATIO * n.distance:
+                good.append(m)
 
-            good = []
-            for pair in knn:
-                if len(pair) < 2:
-                    continue
-                m, n = pair
-
-                if m.distance < RATIO * n.distance:
-                    good.append(m)
-
-            good = sorted(good, key=lambda m: m.distance)
+        good = sorted(good, key=lambda m: m.distance)
 
 
-            #matches = sorted(matches, key=lambda val: val.distance)
+        #matches = sorted(matches, key=lambda val: val.distance)
 
-            matchesNum = len(good)
+        matchesNum = len(good)
 
-            inliers = 0
-            H = None
-            mask = None
-            inlier_matches = []
+        inliers = 0
+        H = None
+        mask = None
+        inlier_matches = []
 
-            if matchesNum >= MIN_GOOD:
-                src_pts = np.float32([tK[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
-                dst_pts = np.float32([vK[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+        if matchesNum >= MIN_GOOD:
+            src_pts = np.float32([tK[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+            dst_pts = np.float32([vK[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
-                H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, RANSAC_THRESH)
+            H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, RANSAC_THRESH)
 
-            if mask is not None and H is not None:
-                mask = mask.ravel().astype(bool)
-                inliers = int(mask.sum())
-                inlier_matches = [good[i] for i in range(len(good)) if mask[i]]
+        if mask is not None and H is not None:
+            mask = mask.ravel().astype(bool)
+            inliers = int(mask.sum())
+            inlier_matches = [good[i] for i in range(len(good)) if mask[i]]
 
-            if (inliers > best_inliers) or (inliers == best_inliers and matchesNum > best_good):
-                best_name = name
-                best_tpl = img
-                best_tK = tK
-                best_good = matchesNum
-                best_inliers = inliers
-                best_H = H
-                best_inlier_matches = inlier_matches
+        if (inliers > best_inliers) or (inliers == best_inliers and matchesNum > best_good):
+            best_name = name
+            best_tpl = img
+            best_tK = tK
+            best_good = matchesNum
+            best_inliers = inliers
+            best_H = H
+            best_inlier_matches = inlier_matches
 
         detected = (H is not None) and (inliers >= MIN_INLIER)
 
