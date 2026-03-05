@@ -3,6 +3,7 @@ from time import sleep
 from Camera import Camera
 import cv2
 import numpy as np
+from Symbol import symbol_detect
 
 #
 # ------ Motor A GPIO setup ------
@@ -124,7 +125,7 @@ try:
         # ---- Capture frame and get error ----
         frame = cam.read()
         error, thresh, cx, turn, area = cam.get_error(frame)
-        print(area)
+        #print(area)
         # ------ Sharp 90 turn ------
         '''
         if turn == "RIGHT":
@@ -158,7 +159,7 @@ try:
             #print(f"Line lost! Counter: {lost_counter}")
             
             # Use previous error for PIDe
-            print("I'm so lost")
+            #print("I'm so lost")
             current_error = last_error
             
             
@@ -180,7 +181,7 @@ try:
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
         pid_output = Kp * current_error + Ki * integral + Kd * derivative
-        print(derivative)
+        #print(derivative)
         #Save the property scaled error for the next loop
         last_error = current_error
 
@@ -188,7 +189,8 @@ try:
         left_speed = base_speed + pid_output / 1000   # scale PID to 0-1
         right_speed = base_speed - pid_output / 1000
 
-    
+        symbol = symbol_detect()
+        print(symbol)
         # ------ Set motor directions ------
         set_motor(ENA, IN1, IN2, left_speed)
         set_motor(ENB, IN3, IN4, right_speed)
