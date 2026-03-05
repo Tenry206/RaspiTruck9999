@@ -74,20 +74,29 @@ def process_shapes(frame):
     # Re-include your Centroid Linking logic here if needed for QR codes
 
     initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    centers = []
     
+    
+
+    MAX_DISTANCE = 100
+    centers = []
+
     for cnt in initial_contours:
-        if cv2.contourArea(cnt) > 300:
+        if cv2.contourArea(cnt) >300:
             M = cv2.moments(cnt)
             if M['m00']!= 0:
-                centers.append((int(M['m10']/M['m00']), int(M['m01']/M['m00'])))
-    '''
+                cx = int(M['m10']/M['m00'])
+                cy = int(M['m01']/M['m00'])
+                centers.append((cx,cy))
+                
     for i in range(len(centers)):
         for j in range(i+1, len(centers)):
-            if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < 100:
-                cv2.line(thresh, centers[i], centers[j], 255, thickness=10)
-    '''
+            # Calculate straight-line distance between shape centers
+            if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < MAX_DISTANCE:
+                # Draw a thick white line to fuse the shapes
+                cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
+    
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.imshow("Linked Threshold Mask", thresh)
 
     results = []
     for cnt in contours:
@@ -169,16 +178,25 @@ def main():
             initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             #Distance between seperate shape
-            
+            '''
             MAX_DISTANCE = 100
             centers = []
+
+            for cnt in initial_contours:
+                if cv2.contourArea(cnt) >300:
+                    M = cv2.moments(cnt)
+                    if M['m00']!= 0:
+                        cx = int(M['m10']/M['m00'])
+                        cy = int(M['m01']/M['m00'])
+                        centers.append((cx,cy))
+                        
             for i in range(len(centers)):
                 for j in range(i+1, len(centers)):
                     # Calculate straight-line distance between shape centers
                     if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < MAX_DISTANCE:
                         # Draw a thick white line to fuse the shapes
                         cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
-            
+            '''
             cv2.imshow("Linked Threshold Mask", thresh)
             
             # 4. Find contours
