@@ -4,7 +4,7 @@ from Camera import Camera
 import cv2
 import numpy as np
 from Symbol import symbol_detect, build_templatesF
-
+from Shape import process_shapes
 # ------ Templates ------
 
 templates = {
@@ -149,7 +149,17 @@ try:
         if symbol_cooldown > 0:
             symbol_cooldown -= 1
         elif counter % 5 == 0:
-            symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
+            detected_shapes, shape_thresh = process_shapes(frame)
+            for shape in detected_shapes:
+                if shape['label']=='Arrow':
+                    print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
+                    sleep(1)   
+                elif shape['label'] != 'Noise':
+                    print(f"Detected Shape: {shape['label']}")
+                    sleep(1) 
+                elif shape['label'] == 'Noise':
+                    symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
+                    
 
         if symbol is not None:
             stop()
@@ -214,7 +224,7 @@ try:
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
         pid_output = Kp * current_error + Ki * integral + Kd * derivative
-        #print(derivative)
+        print(derivative)
         #Save the property scaled error for the next loop
         last_error = current_error
 

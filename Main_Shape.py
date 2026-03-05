@@ -129,7 +129,7 @@ try:
 
         for shape in detected_shapes:
             if shape['label']=='Arrow':
-                print(f"Detected {shape['color']} Arrow")
+                print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
                 integral = 0
                 last_error = 0
                 stop()

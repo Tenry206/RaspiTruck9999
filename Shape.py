@@ -104,11 +104,35 @@ def process_shapes(frame):
             
             if shape_label == "Arrow" and detected_color == "Unknown":
                 shape_label = 'Noise'
-                
+
+            if shape_label == "Arrow":
+                M = cv2.moments(cnt)
+                if M['m00'] != 0:
+                    cx = int(M['m10']/M['m00']) 
+                    cy = int(M['m01']/M['m00']) 
+                    max_dist = 0
+                    tip_x, tip_y = cx, cy
+
+                    for pt in cnt:
+                        px, py = pt[0]
+                        dist = (px-cx)**2 + (py-cy)**2
+                        if dist>max_dist:
+                            max_dist = dist
+                            tip_x, tip_y = px,py
+                    dx = tip_x - cx
+                    dy = tip_y - cy
+                    if abs(dx) > abs(dy):
+                        direction = 'Right' if dx>0 else "Left"
+                    else:direction = "Down" if dy > 0 else "Up"
+
+
+        if shape_label != 'Noise' or (shape_label == 'Noise' and area > 1000):
             results.append({
                 'label': shape_label,
                 'color': detected_color,
-                'contour': cnt
+                'direction': direction,
+                'contour': cnt,
+                'area': area
             })
     return results, thresh
 '''
