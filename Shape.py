@@ -141,7 +141,7 @@ def process_shapes(frame):
                 'area': area
             })
     return results, thresh
-
+'''
 def main():
     # 1. Initialize your custom Camera class
     print("Initializing Camera...")
@@ -164,11 +164,19 @@ def main():
             # NOTE: If your shapes are black on a white background, use THRESH_BINARY_INV
             # If they are white/light on a dark background, use THRESH_BINARY
             _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
             
             initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             #Distance between seperate shape
-            MAX_DISTANCE = 100
+            MAX_DISTANCE = 150
+            centers = []
+            for i in range(len(centers)):
+                for j in range(i+1, len(centers)):
+                    # Calculate straight-line distance between shape centers
+                    if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < MAX_DISTANCE:
+                        # Draw a thick white line to fuse the shapes
+                        cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
             
             cv2.imshow("Linked Threshold Mask", thresh)
             
@@ -224,3 +232,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
