@@ -81,12 +81,12 @@ def process_shapes(frame):
             M = cv2.moments(cnt)
             if M['m00']!= 0:
                 centers.append((int(M['m10']/M['m00']), int(M['m01']/M['m00'])))
-    
+    '''
     for i in range(len(centers)):
         for j in range(i+1, len(centers)):
-            if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < 80:
-                cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
-    
+            if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < 100:
+                cv2.line(thresh, centers[i], centers[j], 255, thickness=10)
+    '''
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     results = []
@@ -141,7 +141,7 @@ def process_shapes(frame):
                 'area': area
             })
     return results, thresh
-'''
+
 def main():
     # 1. Initialize your custom Camera class
     print("Initializing Camera...")
@@ -169,7 +169,8 @@ def main():
             initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             #Distance between seperate shape
-            MAX_DISTANCE = 150
+            
+            MAX_DISTANCE = 100
             centers = []
             for i in range(len(centers)):
                 for j in range(i+1, len(centers)):
@@ -232,4 +233,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
