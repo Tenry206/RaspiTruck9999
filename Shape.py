@@ -83,11 +83,9 @@ def process_shapes(frame):
             detected_color = "Unknown"
             for color_name, (lower, upper) in color_ranges.items():
                 if lower[0] <= h_avg <= upper[0]:
-                    detected_color = color_name
+                    detected_color = color_names
                     break
-            
-            if shape_label == "Arrow" and detected_color == "Unknown"
-                shape_label = 'Noise'
+
                 
             results.append({
                 'label': shape_label,
