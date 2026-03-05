@@ -12,7 +12,7 @@ templates = {
     'warning': cv2.imread('symbols/warning.png', 0),
 }
 
-orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15)
+orb = cv2.ORB_create(nfeatures=3000, fastThreshold=12)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 

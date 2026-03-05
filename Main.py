@@ -100,12 +100,12 @@ def Turn(angle, speed = 0.5 , clockwise = True):
 # ------ PID parameters ------
 
 
-Kp = 10.4 #kp = 5 , kd = 0.4; kp = 7, kd = 0.4q
+Kp = 11.7 #kp = 5 , kd = 0.4; kp = 7, kd = 0.4q
 Ki = 0
 Kd = 0.37
 
 
-base_speed = 0.5  # duty cycle 0-1
+base_speed = 0.7  # duty cycle 0-1
 last_error = 0
 integral = 0
 dt = 0.02  # control loop 50 Hz
@@ -180,7 +180,7 @@ try:
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
         pid_output = Kp * current_error + Ki * integral + Kd * derivative
-        
+        print(derivative)
         #Save the property scaled error for the next loop
         last_error = current_error
 
