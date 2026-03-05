@@ -12,8 +12,7 @@ templates = {
     'fingerprint': cv2.imread('symbols/fingerprint.png', 0),
     'qr': cv2.imread('symbols/qr.png', 0),
     'recycle': cv2.imread('symbols/recycle.png', 0),
-    'warning': cv2.imread('symbols/warning.png', 0),
-    'trapezium': cv2.imread('shapes/trapezium.png', 0)
+    'warning': cv2.imread('symbols/warning.png', 0)
 }
 
 #
