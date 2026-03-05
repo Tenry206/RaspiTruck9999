@@ -24,9 +24,7 @@ def symbol_detect(frame, templates):
 
 
 
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    vK, vD = orb.detectAndCompute(frame_gray, None)
+    vK, vD = orb.detectAndCompute(frame, None)
 
     best_name = None
     best_tpl = None
