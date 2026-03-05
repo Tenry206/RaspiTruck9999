@@ -159,14 +159,17 @@ try:
                     sleep(1) 
                 elif shape['label'] == 'Noise':
                     symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
-                    
-
+                    if symbol !=None:
+                        print(symbol)
+                        sleep(1)
+        
+        '''
         if symbol is not None:
             stop()
-            print(symbol)
+            
             symbol_cooldown = 60   # ignore symbols for ~1 sec at 60fps
             continue
-
+        '''
         error, thresh, cx, turn, area = cam.get_error(frame)
         #print(area)
         # ------ Sharp 90 turn ------
@@ -202,7 +205,7 @@ try:
             #print(f"Line lost! Counter: {lost_counter}")
             
             # Use previous error for PIDe
-            #print("I'm so lost")
+            print("I'm so lost")
             current_error = last_error
             
             

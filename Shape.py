@@ -62,7 +62,13 @@ def process_shapes(frame):
     """Processes a frame to detect shapes and colors."""
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     saturation = hsv[:, :, 1]
-    blurred = cv2.GaussianBlur(saturation, (5, 5), 0)           
+    blurred = cv2.GaussianBlur(saturation, (5, 5), 0)
+    
+    # if background too bright just ignore
+    if np.max(blurred) < 70:  # You may need to tune '50' between 30 and 80
+        return [], np.zeros_like(blurred)
+
+
     _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # Re-include your Centroid Linking logic here if needed for QR codes
@@ -135,7 +141,7 @@ def process_shapes(frame):
                 'area': area
             })
     return results, thresh
-'''
+
 def main():
     # 1. Initialize your custom Camera class
     print("Initializing Camera...")
@@ -158,8 +164,6 @@ def main():
             # NOTE: If your shapes are black on a white background, use THRESH_BINARY_INV
             # If they are white/light on a dark background, use THRESH_BINARY
             _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-
             
             initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
@@ -220,4 +224,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
