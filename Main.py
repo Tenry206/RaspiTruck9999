@@ -131,7 +131,7 @@ lost_counter = 0
 search_speed = 0.7
 counter = 0
 
-orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15, nlevels=10, firstLevel=0, edgeThreshold=31, scaleFactor=1.1, patchSize=31, WTA_K = 2, scoreType=cv2.ORB_HARRIS_SCORE)
+orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15, nlevels=8, scaleFactor=1.05, patchSize=31, WTA_K = 4, scoreType=cv2.ORB_HARRIS_SCORE)
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
 
@@ -148,7 +148,7 @@ try:
 
         if symbol_cooldown > 0:
             symbol_cooldown -= 1
-        elif counter % 3 == 0:
+        elif counter % 5 == 0:
             detected_shapes, shape_thresh = process_shapes(frame)
             for shape in detected_shapes:
                 if shape['label']=='Arrow':
