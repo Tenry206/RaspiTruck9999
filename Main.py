@@ -131,8 +131,8 @@ lost_counter = 0
 search_speed = 0.7
 counter = 0
 
-orb = cv2.ORB_create(nfeatures=2000, fastThreshold=18, nlevels=8, scaleFactor=1.1, patchSize=31, WTA_K=4, scoreType=cv2.ORB_HARRIS_SCORE)
-matcher = cv2.BFMatcher(cv2.NORM_HAMMING2)
+orb = cv2.ORB_create(nfeatures=2000, fastThreshold=17, nlevels=8, scaleFactor=1.1, patchSize=31, scoreType=cv2.ORB_HARRIS_SCORE)
+matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
 
 symbol_cooldown = 0
