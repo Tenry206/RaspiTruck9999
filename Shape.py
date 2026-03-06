@@ -4,10 +4,10 @@ from Camera import Camera
 import math
 
 color_ranges = {
-    'Green':  [(30, 80, 150), (60, 120, 170)],
+    'Green':  [(30, 80, 105), (60, 130, 125)],
     'Blue':   [(10, 235, 180), (20, 255, 200)],
-    'Orange': [(90, 180, 200), (110, 200, 220)],
-    'Red':    [(110, 130, 180), (125, 150, 200)]
+    'Orange': [(100, 165, 170), (120, 180, 200)],
+    'Red':    [(105, 110, 120), (130, 160, 180)]
 }
 
 def detect_shape(cnt):
@@ -31,14 +31,11 @@ def detect_shape(cnt):
     ar = w/float(h)
 
     if verts == 4 :
-        if  A<13700 and 0.6<C<0.7:
+        if 10000< A<17000 and 0.67<C<0.70:
             return 'Trapezium', ar, A, P, C, verts
-        elif 0.685<C<0.8:
-            return 'Diamond' ,ar, A, P, C, verts
-    elif verts == 5:
-        if 0.3<C<0.6:
-            return 'Diamond', ar, A, P, C, verts    
-    elif verts == 6:
+        elif 10000<A<18500 and 0.68<C<0.8:
+            return 'Diamond' ,ar, A, P, C, verts   
+    elif verts == 6 and 10000<A <12000 and 0.74<C<0.8:
         if 0.76<C<0.9 :
             return 'Semicircle', ar, A, P, C, verts
         elif 0.2<C<0.26:
@@ -57,7 +54,7 @@ def detect_shape(cnt):
             return '3/4 Circle', ar, A, P, C, verts
         elif 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
-    elif verts == 10 and 0.25<C<0.30:
+    elif verts == 10 and 0.25<C<0.30 and A<8000:
         return 'Star' ,ar, A, P, C, verts
     elif verts == 12 and 0.5<C<0.7:
         return 'Cross' ,ar, A, P, C, verts
@@ -130,12 +127,16 @@ def process_shapes(frame):
         direction = "None"
         detected_color = "Unknown"
 
+        h_avg, s_avg, v_avg = 0, 0, 0
+
         if shape_label != 'Noise':
             # Color detection logic
             mask = np.zeros(saturation.shape, np.uint8)
             cv2.drawContours(mask, [cnt], -1, 255, -1)
             mean_val = cv2.mean(hsv, mask=mask)
             h_avg = int(mean_val[0])
+            s_avg = int(mean_val[1])
+            v_avg = int(mean_val[2])
             
             
             for color_name, (lower, upper) in color_ranges.items():
@@ -173,7 +174,8 @@ def process_shapes(frame):
                 'color': detected_color,
                 'direction': direction,
                 'contour': cnt,
-                'area': area
+                'area': area,
+                'hsv': (h_avg, s_avg, v_avg)
             })
     return results, thresh
 
@@ -189,19 +191,19 @@ def main():
             
             # 3. Process the full frame for shapes
             # Convert to HSV color space instead of Grayscale
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            #hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             
             # Extract ONLY the Saturation channel (Index 1)
             # Colorful things are white, grayscale things (background) become black
-            saturation = hsv[:, :, 1]
-            blurred = cv2.GaussianBlur(saturation, (5, 5), 0)           
+            #saturation = hsv[:, :, 1]
+            #blurred = cv2.GaussianBlur(saturation, (5, 5), 0)           
             
             # NOTE: If your shapes are black on a white background, use THRESH_BINARY_INV
             # If they are white/light on a dark background, use THRESH_BINARY
-            _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            #_, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
             
-            initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            #initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             #Distance between seperate shape
             '''
@@ -223,12 +225,15 @@ def main():
                         # Draw a thick white line to fuse the shapes
                         cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
             '''
-            cv2.imshow("Linked Threshold Mask", thresh)
+            #cv2.imshow("Linked Threshold Mask", thresh)
             
             # 4. Find contours
-            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            #contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            for cnt in contours:
+            detected_shapes, thresh_mask = process_shapes(frame)
+            '''
+            for shape in detected_shapes:
+                
                 shape_label, ar, A, P, C, verts = detect_shape(cnt)
                 
                 mask = np.zeros(saturation.shape, np.uint8)
@@ -241,7 +246,7 @@ def main():
                     if lower[0] <= h_avg <= upper[0]:
                         detected_color = color_name
                         break
-
+amsk
                 if shape_label != 'Noise':
                     # Draw the bounding polygon
                     eps = 0.03 * cv2.arcLength(cnt, True)
@@ -263,6 +268,35 @@ def main():
                     print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
             print(h_avg, s_avg, v_avg)
             # 5. Display the live feed
+            '''
+
+            for shape in detected_shapes:
+                cnt = shape['contour']
+                label = shape['label']
+                color = shape['color']
+                direction = shape['direction']
+                area = shape['area']
+                h, s, v = shape['hsv']
+                
+                
+                # Only draw and print if it's a real shape
+                if label != 'Noise':
+                    # Draw the green outline
+                    eps = 0.03 * cv2.arcLength(cnt, True)
+                    approx = cv2.approxPolyDP(cnt, eps, True)
+                    cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)
+                    
+                    # Print to terminal
+                    if label == 'Arrow':
+                        print(f"Detected {color} Arrow pointing {direction}")
+                        print(f"HSV: H={h} S={s} V={v}")
+                    else:
+                        P = cv2.arcLength(cnt, True)
+                        C = 4 * np.pi * area / (P**2) if P > 0 else 0
+                        verts = len(approx)
+                        print(f"{label}: Area={area:.0f}, Circ={C:.2f}, Verts={verts}")
+                        
+                
             cv2.imshow("Shape Detection", frame)
             
             # 6. Exit condition (Press 'q' to quit)

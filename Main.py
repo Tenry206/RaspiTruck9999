@@ -131,7 +131,7 @@ lost_counter = 0
 search_speed = 0.7
 counter = 0
 
-orb = cv2.ORB_create(nfeatures=2000, fastThreshold=15, nlevels=12, scaleFactor=1.1, patchSize=31)
+orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.2, patchSize=31)
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
 
@@ -148,19 +148,22 @@ try:
 
         if symbol_cooldown > 0:
             symbol_cooldown -= 1
-        elif counter % 3 == 0:
+        elif counter % 5 == 0:
             detected_shapes, shape_thresh = process_shapes(frame)
             for shape in detected_shapes:
                 if shape['label']=='Arrow':
                     print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
+                    stop()
                     sleep(1)   
                 elif shape['label'] != 'Noise':
                     print(f"Detected Shape: {shape['label']}")
+                    stop()
                     sleep(1) 
                 elif shape['label'] == 'Noise':
                     symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
                     if symbol !=None:
                         print(symbol)
+                        stop()
                         sleep(1)
         
         '''
