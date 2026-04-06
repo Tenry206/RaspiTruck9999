@@ -247,45 +247,57 @@ def thread_line_follow():
 
 def thread_vision():
     global orb, matcher, templatesF
-    counter = 0
-
+    #counter = 0
+    symbol_cooldown = 0
     while state.running:
         frame = state.get_frame()
         if frame is None:
             sleep(0.05)
             continue
             
-        counter += 1
+        #counter += 1
         #symbol = None
-
+        if symbol_cooldown > 0:
+            symbol_cooldown -=1
+            sleep(0.1)
+            continue
         
         #if symbol_cooldown > 0:
         #    symbol_cooldown -= 1
-        if counter % 5 == 0:
-            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            detected_shapes, shape_thresh = process_shapes(frame)
+        #if counter % 5 == 0:
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        detected_shapes, shape_thresh = process_shapes(frame)
 
-            for shape in detected_shapes:
-                if shape['label']=='Arrow':
-                    print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
+        for shape in detected_shapes:
+            if shape['label']=='Arrow':
+                print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
+                state.set_override('STOP')
+                sleep(1)
+                state.set_override('NONE') 
+                symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
+                break  
+            elif shape['label'] != 'Noise':
+                print(f"Detected Shape: {shape['label']}")
+                state.set_override('STOP')
+                sleep(1)
+                state.set_override('NONE') 
+                symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
+                break
+            elif shape['label'] == 'Noise':
+                orb_start_time = time()
+
+                symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
+
+                orb_delay = (time() - orb_start_time) *1000
+                print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
+                if symbol !=None:
+                    print(symbol)
                     state.set_override('STOP')
-                    sleep(1)   
-                elif shape['label'] != 'Noise':
-                    print(f"Detected Shape: {shape['label']}")
-                    state.set_override('STOP')
-                    sleep(1) 
-                elif shape['label'] == 'Noise':
-                    orb_start_time = time()
-
-                    symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
-
-                    orb_delay = (time() - orb_start_time) *1000
-                    print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
-                    if symbol !=None:
-                        print(symbol)
-                        state.set_override('STOP')
-                        sleep(1)
-        sleep(0.1)
+                    sleep(1)
+                    state.set_override('NONE')
+                    symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
+                break
+    sleep(0.1)
 
 def thread_motor():
     while state.running:
