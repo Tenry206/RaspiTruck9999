@@ -89,57 +89,60 @@ def process_shapes(frame):
     thresh[:50, :] = 0   
     '''
     # --- NEW STRATEGY: DYNAMIC BOX ROI ---
-    # 1. Isolate very dark things (the track and the bounding box)
+    # --- UPGRADED STRATEGY: HIERARCHY & THIN LINE DETECTION ---
+    
+    # 1. Isolate dark things (the thin black track and bounding box)
+    # You might need to adjust '90' slightly depending on room lighting
     _, black_mask = cv2.threshold(blur_gray, 90, 255, cv2.THRESH_BINARY_INV)
     
-    # 2. Use morphology to close any gaps in the black box line
-    box_kernel = np.ones((9,9), np.uint8)
-    black_mask = cv2.morphologyEx(black_mask, cv2.MORPH_CLOSE, box_kernel)
+    # 2. THICKEN THE THIN LINE: Use dilate to inflate thin edges so they don't break
+    line_kernel = np.ones((5, 5), np.uint8)
+    black_mask = cv2.dilate(black_mask, line_kernel, iterations=2)
 
-    # 3. Find contours of the dark objects
-    box_contours, _ = cv2.findContours(black_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # 3. HIERARCHY DETECTION: Use RETR_TREE to find parents and children
+    box_contours, hierarchy = cv2.findContours(black_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
-    # Create a blank mask for our dynamic ROI
     roi_mask = np.zeros_like(gray)
     box_found = False
 
-    for c in box_contours:
-        area = cv2.contourArea(c)
-        # Check if it's large enough to be the box, but not a tiny shadow
-        # You may need to tune 8000 and 70000 based on how big the box is in the camera
-        print(f"Area of the box contours is {area}")
-        if 8000 < area < 70000: 
-            peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+    if hierarchy is not None:
+        # Loop through all contours
+        for i, c in enumerate(box_contours):
+            area = cv2.contourArea(c)
             
-            # Check bounding box aspect ratio to ensure it's roughly a square
-            _, _, w, h = cv2.boundingRect(approx)
-            ar = w / float(h)
-            print("approx of the box:{approx}, ar of the box: {ar}")
-            # If it has ~4 corners and is square-ish
-            if len(approx) >= 4 and 0.5 < ar < 1.5:
-                # We found the box! Fill it with white on our blank mask
-                cv2.drawContours(roi_mask, [c], -1, 255, -1)
-                box_found = True
+            # Filter out tiny dust and massive background blobs
+            if 15000 < area < 80000: 
+                peri = cv2.arcLength(c, True)
+                approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
-                # Draw a blue box on the main frame for debugging so you can see it working
-                cv2.drawContours(frame, [c], -1, (255, 0, 0), 4)
-                break 
+                _, _, w, h = cv2.boundingRect(approx)
+                ar = w / float(h)
+                corners = len(approx)
+                
+                # If we found the Parent Box (4 corners, square-ish)
+                if corners == 4 and 0.5 < ar < 1.5:
+                    print(f">>> SUCCESS! Box Found! Area: {area:.0f} ar:{ar}")
+                    
+                    # 4. Fill the Parent Box with solid white to act as a window
+                    cv2.drawContours(roi_mask, [c], -1, 255, -1)
+                    box_found = True
+                    
+                    # Draw a blue box on the camera feed for debugging
+                    cv2.drawContours(frame, [c], -1, (255, 0, 0), 4)
+                    break 
 
     if box_found:
-        # 4. THE TRICK: Erode (shrink) the ROI mask!
-        # This removes the black border of the box itself so it doesn't glue to your shape
-        shrink_kernel = np.ones((15, 15), np.uint8)
+        # 5. Erode the mask slightly inward so the black line itself 
+        # doesn't accidentally touch the colored shape inside
+        shrink_kernel = np.ones((12, 12), np.uint8)
         roi_mask = cv2.erode(roi_mask, shrink_kernel, iterations=1)
         
-        # 5. Apply the mask to our original shape threshold
-        thresh = cv2.bitwise_and(thresh, roi_mask)
+        # 6. ISOLATE THE CHILDREN: Only look for colored shapes INSIDE the box mask!
+        # Notice we are ONLY using mask_color here, completely ignoring the black track.
+        thresh = cv2.bitwise_and(mask_color, roi_mask)
     else:
-        # If no box is found, completely erase the threshold. 
-        # This guarantees the robot will never mistake the track line for a shape!
-        thresh[:, :] = 0 
-        
-    # --- END DYNAMIC BOX ROI ---
+        # If no box is found, erase everything. The robot will just follow the line.
+        thresh[:, :] = 0
     # ------------------------------------------------
 
     # 5. Shape Glue
@@ -331,7 +334,38 @@ amsk
                 area = shape['area']
                 h, s, v = shape['hsv']
                 
+                #--- temporary test
+                # 1. Recalculate corners and AR for our debug print
+                eps = 0.03 * cv2.arcLength(cnt, True)
+                approx = cv2.approxPolyDP(cnt, eps, True)
+                verts = len(approx)
                 
+                _, _, bw, bh = cv2.boundingRect(approx)
+                ar = bw / float(bh) if bh > 0 else 0
+                
+                # 2. Draw the outline (RED if unrecognized Noise, GREEN if successful Shape)
+                outline_color = (0, 0, 255) if label == 'Noise' else (0, 255, 0)
+                cv2.drawContours(frame, [approx], 0, outline_color, 3)
+                
+                # 3. Print stats DIRECTLY onto the camera window!
+                M = cv2.moments(cnt)
+                if M['m00'] != 0:
+                    cx = int(M['m10']/M['m00'])
+                    cy = int(M['m01']/M['m00'])
+                    
+                    # Draw Text: Area, Corners (Verts), and AR hovering over the shape
+                    cv2.putText(frame, f"Area: {area:.0f}", (cx - 50, cy - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"Corn: {verts}", (cx - 50, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"AR: {ar:.2f}", (cx - 50, cy + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"Hue: {h}", (cx - 50, cy + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"{label}", (cx - 50, cy + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
+                # Print to terminal as well
+                print(f"TUNING -> {label}: Area={area:.0f}, Corners={verts}, AR={ar:.2f}, Hue={h}")
+                
+            # 4. Show the temporary tuning window
+            cv2.imshow("Shape Tuning Window", frame)
+            '''
                 # Only draw and print if it's a real shape
                 if label != 'Noise':
                     # Draw the green outline
@@ -351,7 +385,7 @@ amsk
                         
                 
             #cv2.imshow("Shape Detection", frame)
-            
+            '''
             # 6. Exit condition (Press 'q' to quit)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
