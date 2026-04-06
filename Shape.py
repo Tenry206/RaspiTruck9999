@@ -81,12 +81,65 @@ def process_shapes(frame):
     _, mask_dark = cv2.threshold(blur_gray, 150, 255, cv2.THRESH_BINARY_INV)
 
     thresh = cv2.bitwise_or(mask_color, mask_dark)
-
+    '''
     #roi
     thresh[:, :120] = 0  
     thresh[:, 500:] = 0  
     # Optionally, ignore the very top of the frame too
     thresh[:50, :] = 0   
+    '''
+    # --- NEW STRATEGY: DYNAMIC BOX ROI ---
+    # 1. Isolate very dark things (the track and the bounding box)
+    _, black_mask = cv2.threshold(blur_gray, 90, 255, cv2.THRESH_BINARY_INV)
+    
+    # 2. Use morphology to close any gaps in the black box line
+    box_kernel = np.ones((9,9), np.uint8)
+    black_mask = cv2.morphologyEx(black_mask, cv2.MORPH_CLOSE, box_kernel)
+
+    # 3. Find contours of the dark objects
+    box_contours, _ = cv2.findContours(black_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Create a blank mask for our dynamic ROI
+    roi_mask = np.zeros_like(gray)
+    box_found = False
+
+    for c in box_contours:
+        area = cv2.contourArea(c)
+        # Check if it's large enough to be the box, but not a tiny shadow
+        # You may need to tune 8000 and 70000 based on how big the box is in the camera
+        print(f"Area of the box contours is {area}")
+        if 8000 < area < 70000: 
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+            
+            # Check bounding box aspect ratio to ensure it's roughly a square
+            _, _, w, h = cv2.boundingRect(approx)
+            ar = w / float(h)
+            print("approx of the box:{approx}, ar of the box: {ar}")
+            # If it has ~4 corners and is square-ish
+            if len(approx) >= 4 and 0.5 < ar < 1.5:
+                # We found the box! Fill it with white on our blank mask
+                cv2.drawContours(roi_mask, [c], -1, 255, -1)
+                box_found = True
+                
+                # Draw a blue box on the main frame for debugging so you can see it working
+                cv2.drawContours(frame, [c], -1, (255, 0, 0), 4)
+                break 
+
+    if box_found:
+        # 4. THE TRICK: Erode (shrink) the ROI mask!
+        # This removes the black border of the box itself so it doesn't glue to your shape
+        shrink_kernel = np.ones((15, 15), np.uint8)
+        roi_mask = cv2.erode(roi_mask, shrink_kernel, iterations=1)
+        
+        # 5. Apply the mask to our original shape threshold
+        thresh = cv2.bitwise_and(thresh, roi_mask)
+    else:
+        # If no box is found, completely erase the threshold. 
+        # This guarantees the robot will never mistake the track line for a shape!
+        thresh[:, :] = 0 
+        
+    # --- END DYNAMIC BOX ROI ---
     # ------------------------------------------------
 
     # 5. Shape Glue
@@ -119,7 +172,7 @@ def process_shapes(frame):
                 cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
     
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.imshow("Linked Threshold Mask", thresh)
+    #cv2.imshow("Linked Threshold Mask", thresh)
 
     results = []
     for cnt in contours:
@@ -297,7 +350,7 @@ amsk
                         print(f"{label}: Area={area:.0f}, Circ={C:.2f}, Verts={verts}")
                         
                 
-            cv2.imshow("Shape Detection", frame)
+            #cv2.imshow("Shape Detection", frame)
             
             # 6. Exit condition (Press 'q' to quit)
             if cv2.waitKey(1) & 0xFF == ord('q'):

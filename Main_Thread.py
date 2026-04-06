@@ -259,7 +259,7 @@ def thread_vision():
         #symbol = None
         if symbol_cooldown > 0:
             symbol_cooldown -=1
-            sleep(0.1)
+            sleep(0.05)
             continue
         
         #if symbol_cooldown > 0:
@@ -267,6 +267,8 @@ def thread_vision():
         #if counter % 5 == 0:
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(frame)
+
+        state.shape_mask = shape_thresh
 
         for shape in detected_shapes:
             if shape['label']=='Arrow':
@@ -297,7 +299,7 @@ def thread_vision():
                     state.set_override('NONE')
                     symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
-    sleep(0.1)
+        sleep(0.1)
 
 def thread_motor():
     while state.running:
@@ -335,6 +337,9 @@ try:
         display_frame = state.get_frame()
         if display_frame is not None:
             cv2.imshow("Robot View", display_frame)
+            if hasattr(state, 'shape_mask') and state.shape_mask is not None:
+                cv2.imshow("Linked Threshold Mask", state.shape_mask)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 print("Quit triggered ...")
                 state.running = False
