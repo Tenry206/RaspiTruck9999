@@ -262,17 +262,17 @@ def thread_vision():
         #if symbol_cooldown > 0:
         #    symbol_cooldown -= 1
         if counter % 5 == 0:
-            frame_gray = cv2.cvtolor(frame, cv2.COLOR_BGR2GRAY)
+            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             detected_shapes, shape_thresh = process_shapes(frame)
 
             for shape in detected_shapes:
                 if shape['label']=='Arrow':
                     print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
-                    stop()
+                    state.set_override('STOP')
                     sleep(1)   
                 elif shape['label'] != 'Noise':
                     print(f"Detected Shape: {shape['label']}")
-                    stop()
+                    state.set_override('STOP')
                     sleep(1) 
                 elif shape['label'] == 'Noise':
                     orb_start_time = time()
@@ -283,7 +283,7 @@ def thread_vision():
                     print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
                     if symbol !=None:
                         print(symbol)
-                        stop()
+                        state.set_override('STOP')
                         sleep(1)
         sleep(0.1)
 
@@ -294,7 +294,7 @@ def thread_motor():
         if override == 'STOP':
             stop()
         elif override == 'SPIN_360':
-            Turn(360, speed = 0.5 , clockwise = True):   
+            Turn(360, speed = 0.5 , clockwise = True)   
         else:
             left,right = state.get_steering()
             set_motor(ENA, IN1, IN2, left)
