@@ -88,30 +88,39 @@ def process_shapes(frame):
     # Optionally, ignore the very top of the frame too
     thresh[:50, :] = 0   
     '''
-    # --- NEW STRATEGY: DYNAMIC BOX ROI ---
-    # --- UPGRADED STRATEGY: HIERARCHY & THIN LINE DETECTION ---
+    # --- UPGRADED STRATEGY: ADAPTIVE THIN LINE DETECTION ---
     
-    # 1. Isolate dark things (the thin black track and bounding box)
-    # You might need to adjust '90' slightly depending on room lighting
-    _, black_mask = cv2.threshold(blur_gray, 90, 255, cv2.THRESH_BINARY_INV)
+    # 1. Adaptive Thresholding: Perfect for finding thin lines on varying backgrounds!
+    # It compares a pixel to its neighbors (21x21 block), pulling out the thin box.
+    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 21, 5)
     
-    # 2. THICKEN THE THIN LINE: Use dilate to inflate thin edges so they don't break
-    line_kernel = np.ones((5, 5), np.uint8)
-    black_mask = cv2.dilate(black_mask, line_kernel, iterations=2)
+    # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
+    line_kernel = np.ones((15, 15), np.uint8)
+    thin_line_mask = cv2.morphologyEx(thin_line_mask, cv2.MORPH_CLOSE, line_kernel)
 
-    # 3. HIERARCHY DETECTION: Use RETR_TREE to find parents and children
-    box_contours, hierarchy = cv2.findContours(black_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # --- NEW: TEMPORARY DEBUG WINDOWS ---
+    # WARNING: Only run these via `python Shape.py` standalone!
+    #cv2.imshow("DEBUG 1: Thin Line Mask", thin_line_mask)
     
+    contour_debug_frame = frame.copy()
+    # ------------------------------------
+
+    # 3. Find Contours (Using RETR_TREE to find the box)
+    box_contours, hierarchy = cv2.findContours(thin_line_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Draw EVERY contour in green so you can visually check if the box is captured!
+    cv2.drawContours(contour_debug_frame, box_contours, -1, (0, 255, 0), 1)
+    #cv2.imshow("DEBUG 2: All Contours", contour_debug_frame)
+
     roi_mask = np.zeros_like(gray)
     box_found = False
 
     if hierarchy is not None:
-        # Loop through all contours
         for i, c in enumerate(box_contours):
             area = cv2.contourArea(c)
             
-            # Filter out tiny dust and massive background blobs
-            if 15000 < area < 80000: 
+            # Look for a medium-to-large square (the black bounding box)
+            if 10000 < area < 80000: 
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
@@ -119,30 +128,31 @@ def process_shapes(frame):
                 ar = w / float(h)
                 corners = len(approx)
                 
-                # If we found the Parent Box (4 corners, square-ish)
-                if corners == 4 and 0.5 < ar < 1.5:
-                    print(f">>> SUCCESS! Box Found! Area: {area:.0f} ar:{ar}")
+                # If we found the Thin Black Box (approx 4 corners, square-ish)
+                if corners >= 4 and 0.5 < ar < 1.5:
+                    print(f">>> SUCCESS! Thin Box Found! Area: {area:.0f} AR:{ar:.2f}")
                     
-                    # 4. Fill the Parent Box with solid white to act as a window
+                    # 4. Fill the exact shape of the box to act as our window
                     cv2.drawContours(roi_mask, [c], -1, 255, -1)
                     box_found = True
                     
-                    # Draw a blue box on the camera feed for debugging
+                    # Draw a thick blue box on the main camera feed
                     cv2.drawContours(frame, [c], -1, (255, 0, 0), 4)
                     break 
 
     if box_found:
-        # 5. Erode the mask slightly inward so the black line itself 
-        # doesn't accidentally touch the colored shape inside
-        shrink_kernel = np.ones((12, 12), np.uint8)
+        # 5. Shrink the mask slightly inward so the black border itself 
+        # doesn't interfere with your color detection inside
+        shrink_kernel = np.ones((8, 8), np.uint8)
         roi_mask = cv2.erode(roi_mask, shrink_kernel, iterations=1)
         
-        # 6. ISOLATE THE CHILDREN: Only look for colored shapes INSIDE the box mask!
-        # Notice we are ONLY using mask_color here, completely ignoring the black track.
+        # 6. Apply the mask to your original color threshold
         thresh = cv2.bitwise_and(mask_color, roi_mask)
     else:
-        # If no box is found, erase everything. The robot will just follow the line.
-        thresh[:, :] = 0
+        # If no box is found, erase everything.
+        thresh[:, :] = 0 
+        
+    # --- END UPGRADED STRATEGY ---
     # ------------------------------------------------
 
     # 5. Shape Glue
