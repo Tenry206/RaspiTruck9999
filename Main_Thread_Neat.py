@@ -186,7 +186,7 @@ def thread_line_follow():
 
         # ------ Handle line lost ------
 
-        hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        hsv_frame = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
         if cx is not None:
             # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
             safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
