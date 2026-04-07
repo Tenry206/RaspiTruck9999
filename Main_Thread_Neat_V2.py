@@ -148,7 +148,7 @@ def thread_line_follow():
     Ki = 0
     Kd = 0.36
 
-    base_speed = 0.3 #0.7
+    base_speed = 0.4 #0.7
     last_error = 0
     integral = 0
     dt = 0.02
