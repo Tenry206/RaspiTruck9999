@@ -320,7 +320,7 @@ def thread_motor():
 
         elif override == 'spongebob':
             stop()
-            Turn(360, speed = 0.5, clockwise = True) 
+            Turn(600, speed = 1, clockwise = True) 
             state.set_override('NONE')
 
         else:
