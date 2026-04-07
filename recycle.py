@@ -303,7 +303,7 @@ def thread_vision():
                 break
 
         # 10 FPS
-        sleep(0.03)
+        sleep(0.01)
 
         fps = 1.0 / (time() - start)
         print(fps)
