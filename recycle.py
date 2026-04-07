@@ -248,7 +248,7 @@ def thread_line_follow():
 def thread_vision():
 
     global orb, matcher, templatesF
-
+    start = time()
     symbol_cooldown = 0
     while state.running:
         frame = state.get_frame()
@@ -304,7 +304,10 @@ def thread_vision():
                 break
 
         # 10 FPS
-        sleep(0.01)
+        sleep(0.03)
+
+        fps = 1.0 / (time() - start)
+        print(fps)
 
 def thread_motor():
     while state.running:
