@@ -179,7 +179,7 @@ def thread_line_follow():
             fps_start_time = current_time
 
         error, thresh, cx, turn, area = cam.get_error(frame)
-        error_color, colorBool = toilet.colored_error(frame)
+        error_color, colorBool = coloredLine.colored_error(frame)
 
         #print(area)
 
@@ -341,7 +341,7 @@ def thread_motor():
 print("Initializing System ...")
 
 cam = Camera(resolution=(640,480), fps=60)
-
+coloredLine = toilet()
 orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
