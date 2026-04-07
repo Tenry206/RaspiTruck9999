@@ -24,7 +24,7 @@ class FaceScanner:
 
         # 3. --- SET YOUR NAMES HERE ---
         # ID 0 is empty. ID 1 is the first name, ID 2 is the second name, etc.
-        self.names = ['None', 'Tenry', 'Partner Name'] 
+        self.names = ['None', 'Tenry', 'Randy'] 
 
     def scan_for_face(self, frame):
         # We need grayscale for LBPH Recognition

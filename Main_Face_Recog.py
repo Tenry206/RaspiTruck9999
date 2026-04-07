@@ -269,7 +269,9 @@ def thread_vision():
             symbol_cooldown -=1
             sleep(0.05)
             continue
-        
+        h = frame.shape[1]
+        vision_roi = frame[0:int(h * 0.30), :]
+        cv2.imshow("Vision ROI", vision_roi)
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(frame)
 

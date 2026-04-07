@@ -243,7 +243,7 @@ def thread_line_follow():
 
 def thread_vision():
 
-    global orb, matcher, templatesF
+    global orb, matcher, templatesF, vision_roi
     
     symbol_cooldown = 0
     while state.running:
@@ -259,7 +259,7 @@ def thread_vision():
             sleep(0.01)
             continue
 
-        h = frame.shape[1]
+        h = frame.shape[2]
         vision_roi = frame[int(h * 0.3):int(h * 0.7), :]
         frame_gray = cv2.cvtColor(vision_roi, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(vision_roi)
@@ -369,6 +369,7 @@ try:
 
         if display_frame is not None:
             cv2.imshow("Robot View", display_frame)
+            cv2.imshow("Vision ROI", vision_roi)
 
             if hasattr(state, 'shape_mask') and state.shape_mask is not None:
                 cv2.imshow("Linked Threshold Mask", state.shape_mask)
