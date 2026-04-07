@@ -19,6 +19,8 @@ templates = {
     'fingerprint': cv2.imread('symbols/fingerprint.png', 0),
     'qr': cv2.imread('symbols/qr.png', 0),
     'recycle': cv2.imread('symbols/recycle.png', 0),
+    'recycle2': cv2.imread('symbols/recycle(1).png'),
+    'recycle3': cv2.imread('symbols/recycle(1)(1).png'),
     'warning': cv2.imread('symbols/warning.png', 0)
 }
 
@@ -263,7 +265,7 @@ def thread_vision():
         vision_roi = frame[int(h * 0.0):int(h * 0.9),int(w * 0.2):int(w * 0.8), :]
         resized_roi = cv2.resize(vision_roi, None, fx = 0.775, fy = 0.775)
         frame_gray = cv2.cvtColor(resized_roi, cv2.COLOR_BGR2GRAY)
-        detected_shapes, shape_thresh = process_shapes(resized_roi)
+        detected_shapes, shape_thresh = process_shapes(vision_roi)
 
         state.shape_mask = shape_thresh
 
@@ -296,7 +298,7 @@ def thread_vision():
                     if symbol == 'fingerprint' or symbol == 'qr':
                         print(symbol)
 
-                    elif symbol == 'recycle':
+                    elif symbol == 'recycle' or symbol == 'recycle2' or symbol == 'recycle3':
                         state.set_override('spongebob')
                     
                     elif symbol == 'warning' or symbol == 'button':
