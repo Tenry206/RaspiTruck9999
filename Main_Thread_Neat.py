@@ -192,9 +192,9 @@ def thread_line_follow():
         if largest is None:
             print("invalid contour")
         else:
-            mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+            mask = np.zeros(roi.shape[:2], dtype=np.uint8)
             cv2.drawContours(mask, [largest], -1, 255, thickness=cv2.FILLED)
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
             contour_pixels = hsv[mask == 255]
             # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
             safe_cx = max(0, min(roi.shape[1] - 1, int(cx))) # Prevent out-of-bounds crash
@@ -204,7 +204,9 @@ def thread_line_follow():
             mean_v = np.mean(contour_pixels[:, 2])
         
         print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{mean_h}, S:{mean_s}, V:{mean_v}]")
-
+        cv2.imshow("what the sigma", roi)
+        if cv2.waitKey(1) == 27:
+            cv2.destroyAllWindows()
         if error is None or area < 300:
             lost_counter += 1
 
@@ -383,6 +385,7 @@ try:
 
         if display_frame is not None:
             cv2.imshow("Robot View", display_frame)
+
 
             if hasattr(state, 'shape_mask') and state.shape_mask is not None:
                 cv2.imshow("Linked Threshold Mask", state.shape_mask)
