@@ -276,7 +276,6 @@ def thread_vision():
                     state.set_override('underwear')
                 elif shape['direction'] == 'Right':
                     state.set_override('pepsiwheelchair')
-                state.set_override('NONE')
                 break  
 
             elif shape['label'] != 'Noise':
