@@ -45,7 +45,7 @@ class toilet:
 
         M = cv2.moments(largest)
         if M["m00"] == 0:
-            return None, thresh, None, turn, 0
+            return 0, False, 0
 
         cx = int(M["m10"] / M["m00"])
         error = cx - self.frame_center
