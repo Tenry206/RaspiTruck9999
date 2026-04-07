@@ -271,6 +271,7 @@ def thread_vision():
 
             if shape['label']=='Arrow':
                 #print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
+                print(shape['direction'])
                 if shape['direction'] == 'Left':
                     state.set_override('underwear')
                 elif shape['direction'] == 'Right':
