@@ -254,12 +254,12 @@ def thread_vision():
         frame = state.get_frame()
 
         if frame is None:
-            sleep(0.05)
+            sleep(0.01)
             continue
             
         if symbol_cooldown > 0:
             symbol_cooldown -=1
-            sleep(0.05)
+            sleep(0.01)
             continue
         
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -271,11 +271,10 @@ def thread_vision():
 
             if shape['label']=='Arrow':
                 #print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
-                print(shape['direction'])
                 if shape['direction'] == 'Left':
-                    state.set_override('underwear')
+                    state.set_override('SPIN_LEFT')
                 elif shape['direction'] == 'Right':
-                    state.set_override('pepsiwheelchair')
+                    state.set_override('SPIN_RIGHT')
                 break  
 
             elif shape['label'] != 'Noise':
@@ -321,13 +320,15 @@ def thread_motor():
             Turn(480, speed = 1, clockwise = True) 
             state.set_override('NONE')
 
-        elif override == 'underwear':
+        elif override == 'SPIN_LEFT':
             Turn(120, speed = 1, clockwise = False)
             print('left')
+            state.set_override('NONE')
 
-        elif override == 'pepsiwheelchair':
+        elif override == 'SPIN_RIGHT':
             Turn(120, speed = 1, clockwise = True)
             print('right')
+            state.set_override('NONE')
         else:
             left,right = state.get_steering()
             set_motor(ENA, IN1, IN2, left)
