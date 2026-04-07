@@ -191,11 +191,7 @@ def thread_line_follow():
             # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
             safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
             h, s, v = hsv_frame[400, safe_cx]
-            
-            #print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
-        # ==========================================
-        # 1. THE HIERARCHY LOGIC (Color > Black)
-        # ==========================================
+
         active_error = None
         
         # Priority 1: Check for Colored Line
@@ -263,8 +259,8 @@ def thread_vision():
             sleep(0.01)
             continue
 
-        h = frame.shape[0]
-        vision_roi = frame[0:int(h * 0.6), :]
+        h = frame.shape[1]
+        vision_roi = frame[int(h * 0.3):int(h * 0.7), :]
         frame_gray = cv2.cvtColor(vision_roi, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(vision_roi)
 
