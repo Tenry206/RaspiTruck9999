@@ -4,7 +4,9 @@ from Camera import Camera
 import math
 
 class ColouredLineError:
+
     def __init__(self, frame_width = 640):
+
         self.frame_center = frame_width // 2
         
         self.lower_hsv = np.array([105, 110, 120])
@@ -13,7 +15,7 @@ class ColouredLineError:
     def preprocess(self, frame):
         h = frame.shape[0]
 
-        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         thresh = cv2.inRange(hsv, self.lower_hsv, self.upper_hsv)
 
@@ -22,4 +24,7 @@ class ColouredLineError:
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
         return thresh
+        
+    def colored_error(self, frame):
+        thresh = self.preprocess(frame)
         
