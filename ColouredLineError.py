@@ -15,7 +15,6 @@ class toilet:
 
     def preprocess(self, frame):
         h = frame.shape[0]
-        colorBool = False
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         thresh = cv2.inRange(hsv, self.lower_hsv, self.upper_hsv)
@@ -27,6 +26,7 @@ class toilet:
         return thresh
         
     def colored_error(self, frame):
+        colorBool = False
         thresh = self.preprocess(frame)
 
         contours, _ = cv2.findContours(
