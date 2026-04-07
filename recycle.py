@@ -299,7 +299,6 @@ def thread_vision():
                         state.set_override('spongebob')
                     #state.set_override('STOP')
                     #sleep(1)
-                    state.set_override('NONE')
                     symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
 
