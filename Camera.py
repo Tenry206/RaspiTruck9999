@@ -99,7 +99,7 @@ class Camera:
         turn = None
 
         if not contours:
-            return None, thresh, None, turn,0
+            return None, thresh, None, turn, 0, roi
 
         largest = max(contours, key=cv2.contourArea)
         area = cv2.contourArea(largest)
