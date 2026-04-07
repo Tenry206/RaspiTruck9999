@@ -10,8 +10,8 @@ class toilet:
 
         self.frame_center = frame_width // 2
         
-        self.lower_yellow = np.array([40, 40, 30])
-        self.upper_yellow = np.array([90, 120, 50])
+        self.lower_yellow = np.array([80, 180, 180])
+        self.upper_yellow = np.array([120, 220, 220])
         self.colorThresh = 8000
         self.error_queue = deque(maxlen = 2)
 
