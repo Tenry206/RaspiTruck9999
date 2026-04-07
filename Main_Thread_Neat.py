@@ -187,15 +187,15 @@ def thread_line_follow():
         # ------ Handle line lost ------
 
 
-        if error is None and cx is not None or area < 300:
+        if error is None or area < 300:
             lost_counter += 1
             hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            
-            # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
-            safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
-            h, s, v = hsv_frame[400, safe_cx]
-            
-            print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
+            if cx is not None:
+                # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
+                safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
+                h, s, v = hsv_frame[400, safe_cx]
+                
+                print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
             # Use previous error for PIDe
             print("I'm so lost")
             current_error = last_error
