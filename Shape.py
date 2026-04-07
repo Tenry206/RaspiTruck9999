@@ -194,7 +194,7 @@ def process_shapes(frame):
         detected_color = "Unknown"
 
         h_avg, s_avg, v_avg = 0, 0, 0
-
+        
         if shape_label != 'Noise':
             # Color detection logic
             mask = np.zeros(saturation.shape, np.uint8)
