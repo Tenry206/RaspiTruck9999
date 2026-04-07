@@ -323,12 +323,12 @@ def thread_motor():
             state.set_override('NONE')
 
         elif override == 'SPIN_LEFT':
-            Turn(120, speed = 1, clockwise = False)
+            Turn(80, speed = 1, clockwise = False)
             print('left')
             state.set_override('NONE')
 
         elif override == 'SPIN_RIGHT':
-            Turn(120, speed = 1, clockwise = True)
+            Turn(80, speed = 1, clockwise = True)
             print('right')
             state.set_override('NONE')
         else:
