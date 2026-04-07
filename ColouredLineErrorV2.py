@@ -8,16 +8,17 @@ class toilet:
     def __init__(self, frame_width = 640):
         self.frame_center = frame_width // 2
         
-        # Widened the ranges slightly to forgive room shadows / glare
-        self.lower_yellow = np.array([15, 80, 80])#85,100,205
-        self.upper_yellow = np.array([45, 255, 255])#jayden 105,255,255
+        # --- THE RED/BLUE SWAP FIX ---
+        # Because the camera channels are swapped:
+        # 1. Physical YELLOW looks CYAN (Hue ~80 to 105)
+        self.lower_yellow = np.array([80, 80, 80])
+        self.upper_yellow = np.array([105, 255, 255])
         
-        self.lower_red1 = np.array([0, 100, 50])
-        self.upper_red1 = np.array([10, 255, 255])
-        self.lower_red2 = np.array([170, 100, 50])
-        self.upper_red2 = np.array([180, 255, 255])
+        # 2. Physical RED looks BLUE (Hue ~105 to 140)
+        self.lower_red = np.array([105, 100, 50])
+        self.upper_red = np.array([140, 255, 255])
 
-        # FIX 1: Matched the black line sensitivity! (Lowered from 3000 to 400)
+        # Matched the black line sensitivity
         self.colorThresh = 400 
         self.error_queue = deque(maxlen = 2)
 
@@ -28,12 +29,12 @@ class toilet:
 
         hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-        mask_yellow = cv2.inRange(hsv, self.lower_yellow, self.upper_yellow)
-        mask_red1 = cv2.inRange(hsv, self.lower_red1, self.upper_red1)
-        mask_red2 = cv2.inRange(hsv, self.lower_red2, self.upper_red2)
+        # Create separate masks for the swapped colors
+        mask_yellow_cyan = cv2.inRange(hsv, self.lower_yellow, self.upper_yellow)
+        mask_red_blue = cv2.inRange(hsv, self.lower_red, self.upper_red)
         
-        mask_red = cv2.bitwise_or(mask_red1, mask_red2)
-        mask_combined = cv2.bitwise_or(mask_yellow, mask_red)
+        # Combine them into one priority mask
+        mask_combined = cv2.bitwise_or(mask_yellow_cyan, mask_red_blue)
 
         kernel = np.ones((5, 5), np.uint8)
         thresh = cv2.morphologyEx(mask_combined, cv2.MORPH_OPEN, kernel)
@@ -54,7 +55,7 @@ class toilet:
         largest = max(contours, key=cv2.contourArea)
         area = cv2.contourArea(largest)
 
-        # FIX 2: Print ALL raw color data BEFORE the threshold kills it!
+        # Print ALL raw color data BEFORE the threshold kills it
         if area > 50: 
             mask = np.zeros(hsv_roi.shape[:2], dtype=np.uint8)
             cv2.drawContours(mask, [largest], -1, 255, -1)
