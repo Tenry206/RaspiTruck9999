@@ -11,12 +11,12 @@ class toilet:
         # --- THE RED/BLUE SWAP FIX ---
         # Because the camera channels are swapped:
         # 1. Physical YELLOW looks CYAN (Hue ~80 to 105)
-        self.lower_yellow = np.array([80, 80, 80])
-        self.upper_yellow = np.array([105, 255, 255])
+        self.lower_yellow = np.array([80, 180, 180])
+        self.upper_yellow = np.array([120, 220, 220])
         
         # 2. Physical RED looks BLUE (Hue ~105 to 140)
-        self.lower_red = np.array([105, 100, 50])
-        self.upper_red = np.array([140, 255, 255])
+        self.lower_red = np.array([40,40, 30])#105, 100, 50
+        self.upper_red = np.array([90, 120, 50])#140, 255, 255
 
         # Matched the black line sensitivity
         self.colorThresh = 400 
