@@ -314,6 +314,7 @@ def thread_motor():
             stop()
 
         elif override == 'spongebob':
+            stop()
             Turn(360, speed = 0.5 , clockwise = True)   
 
         else:
