@@ -282,7 +282,6 @@ def thread_vision():
                 state.set_override('STOP')
                 sleep(1)
                 state.set_override('NONE') 
-                symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
 
             elif shape['label'] == 'Noise':
@@ -302,12 +301,10 @@ def thread_vision():
                     
                     elif symbol == 'warning' or symbol == 'button':
                         state.set_override('STOP')
-                    #sleep(1)
-                    symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
 
         # 10 FPS
-        sleep(0.1)
+        sleep(0.01)
 
 def thread_motor():
     while state.running:
