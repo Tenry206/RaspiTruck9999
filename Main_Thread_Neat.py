@@ -189,7 +189,7 @@ def thread_line_follow():
 
         hsv_frame = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-        if largest is None or len(largest) == 0:
+        if largest is None:
             print("invalid contour")
         else:
             mask = np.zeros(frame.shape[:2], dtype=np.uint8)
