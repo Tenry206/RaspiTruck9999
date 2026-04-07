@@ -323,9 +323,11 @@ def thread_motor():
 
         elif override == 'underwear':
             Turn(120, speed = 1, clockwise = False)
+            print('left')
 
         elif override == 'pepsiwheelchair':
             Turn(120, speed = 1, clockwise = True)
+            print('right')
         else:
             left,right = state.get_steering()
             set_motor(ENA, IN1, IN2, left)
