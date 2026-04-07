@@ -206,66 +206,66 @@ def thread_line_follow():
                     #set_motor(ENA, IN1, IN2, -search_speed+0.175)
                     #set_motor(ENB, IN3, IN4, search_speed)
                     state.set_steering(-search_speed+0.175, search_speed)
-                    
+                
+                # 50 FPS
                 sleep(dt)
                 continue
+
         else:
             lost_counter = 0
             current_error = error/2.5
 
         # ------ PID calculation ------
+
         integral += current_error * dt
         derivative = (current_error - last_error) / dt
+
         pid_output = Kp * current_error + Ki * integral + Kd * derivative
-        #print(derivative)
-        #Save the property scaled error for the next loop
+
         last_error = current_error
 
         # ------ Compute motor speeds ------
+
         left_speed = base_speed + pid_output / 1000   # scale PID to 0-1
         right_speed = base_speed - pid_output / 1000
 
         # ------ Set motor directions ------
-        #set_motor(ENA, IN1, IN2, left_speed)
-        #set_motor(ENB, IN3, IN4, right_speed)
+
         state.set_steering(left_speed, right_speed)
+
         # ------ Display for debugging ------
+
         #cam.display(frame, cx)
         #cam.display_draw(thresh)
 
+        # 50 FPS
         sleep(dt)
-        '''
-        # ------ Exit ------
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        '''
+
 
 def thread_vision():
+
     global orb, matcher, templatesF
-    #counter = 0
+
     symbol_cooldown = 0
     while state.running:
         frame = state.get_frame()
+
         if frame is None:
             sleep(0.05)
             continue
             
-        #counter += 1
-        #symbol = None
         if symbol_cooldown > 0:
             symbol_cooldown -=1
             sleep(0.05)
             continue
         
-        #if symbol_cooldown > 0:
-        #    symbol_cooldown -= 1
-        #if counter % 5 == 0:
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(frame)
 
         state.shape_mask = shape_thresh
 
         for shape in detected_shapes:
+
             if shape['label']=='Arrow':
                 print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
                 state.set_override('STOP')
@@ -273,6 +273,7 @@ def thread_vision():
                 state.set_override('NONE') 
                 symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break  
+
             elif shape['label'] != 'Noise':
                 print(f"Detected Shape: {shape['label']}")
                 state.set_override('STOP')
@@ -280,6 +281,7 @@ def thread_vision():
                 state.set_override('NONE') 
                 symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
+
             elif shape['label'] == 'Noise':
                 orb_start_time = time()
 
@@ -287,6 +289,7 @@ def thread_vision():
 
                 orb_delay = (time() - orb_start_time) *1000
                 print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
+
                 if symbol !=None:
                     print(symbol)
                     state.set_override('STOP')
@@ -294,6 +297,8 @@ def thread_vision():
                     state.set_override('NONE')
                     symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
+
+        # 10 FPS
         sleep(0.1)
 
 def thread_motor():
@@ -302,22 +307,33 @@ def thread_motor():
 
         if override == 'STOP':
             stop()
+
         elif override == 'SPIN_360':
             Turn(360, speed = 0.5 , clockwise = True)   
+
         else:
             left,right = state.get_steering()
             set_motor(ENA, IN1, IN2, left)
             set_motor(ENB, IN3, IN4, right) 
 
+        # 20 FPS
         sleep(0.05)
 
+
+# ------ Initialization ------
+
+
 print("Initializing System ...")
+
 cam = Camera(resolution=(640,480), fps=60)
+
 orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.2, patchSize=31)
+
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
 
 print("Starting Threads ...")
+
 threads = [
     threading.Thread(target=thread_line_follow),
     threading.Thread(target=thread_vision),
@@ -330,22 +346,31 @@ for t in threads:
 try:
     while state.running:
         display_frame = state.get_frame()
+
         if display_frame is not None:
             cv2.imshow("Robot View", display_frame)
+
             if hasattr(state, 'shape_mask') and state.shape_mask is not None:
                 cv2.imshow("Linked Threshold Mask", state.shape_mask)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 print("Quit triggered ...")
                 state.running = False
+
 except KeyboardInterrupt:
+
     print("Interrupted by User.")
+
 finally:
+
     # Stop motors and camera
     print("Shutting downsafely ...")
+
     state.running = False
+
     for t in threads:
         t.join()
+
     stop()
     cam.stop()
     cv2.destroyAllWindows()
