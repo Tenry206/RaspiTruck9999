@@ -172,7 +172,7 @@ def thread_line_follow():
 
         if (current_time - fps_start_time) >= 1.0:
             fps = fps_frame_count / (current_time - fps_start_time)
-            print(f"--- Sequential Loop Speed: {fps:.1f} FPS ---")
+            #print(f"--- Sequential Loop Speed: {fps:.1f} FPS ---")
             fps_frame_count = 0
             fps_start_time = current_time
 
@@ -192,7 +192,7 @@ def thread_line_follow():
             safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
             h, s, v = hsv_frame[400, safe_cx]
             
-            print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
+            #print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
         # ==========================================
         # 1. THE HIERARCHY LOGIC (Color > Black)
         # ==========================================
@@ -214,7 +214,7 @@ def thread_line_follow():
         # Only panic if BOTH the color line and black line are missing
         if active_error is None:
             lost_counter += 1
-            print("I'm so lost - Searching...")
+            #print("I'm so lost - Searching...")
             
             if lost_counter > 0: 
                 if last_error >= 0:
@@ -270,7 +270,7 @@ def thread_vision():
         for shape in detected_shapes:
 
             if shape['label']=='Arrow':
-                print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
+                #print(f"Detected {shape['color']} Arrow pointing {shape['direction']}")
                 state.set_override('STOP')
                 sleep(1)
                 state.set_override('NONE') 
@@ -278,7 +278,7 @@ def thread_vision():
                 break  
 
             elif shape['label'] != 'Noise':
-                print(f"Detected Shape: {shape['label']}")
+                #print(f"Detected Shape: {shape['label']}")
                 state.set_override('STOP')
                 sleep(1)
                 state.set_override('NONE') 
@@ -291,7 +291,7 @@ def thread_vision():
                 symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
 
                 orb_delay = (time() - orb_start_time) *1000
-                print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
+                #print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
 
                 if symbol !=None:
                     if symbol == 'fingerprint' or symbol == 'qr':
@@ -300,7 +300,7 @@ def thread_vision():
                     elif symbol == 'recycle':
                         state.set_override('spongebob')
                     
-                    elif symbol == 'warning':
+                    elif symbol == 'warning' or symbol == 'button':
                         state.set_override('STOP')
                     #sleep(1)
                     symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
