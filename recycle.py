@@ -294,10 +294,10 @@ def thread_vision():
                 print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
 
                 if symbol !=None:
-                    if symbol == 'button' or symbol == 'qr':
+                    if symbol == 'fingerprint' or symbol == 'qr':
                         print(symbol)
 
-                    elif symbol == 'fingerprint':
+                    elif symbol == 'recycle':
                         state.set_override('spongebob')
                     
                     elif symbol == 'warning':
