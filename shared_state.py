@@ -7,7 +7,8 @@ class SharedState:
         self.frame = None
         self.steering = (0,0)
         self.override = None #for action like STOP or SPIN safely
-    
+        self.current_shape = ""
+
     def update_frame(self, frame):
         with self.lock:
             self.frame = frame
@@ -31,4 +32,6 @@ class SharedState:
     def get_override(self):
         with self.lock:
             return self.override
+        
+   
         
