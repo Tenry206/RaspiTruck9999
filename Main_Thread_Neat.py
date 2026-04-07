@@ -179,7 +179,7 @@ def thread_line_follow():
             fps_frame_count = 0
             fps_start_time = current_time
 
-        error, thresh, cx, turn, area, roi = cam.get_error(frame)
+        error, thresh, cx, turn, area, roi, largest = cam.get_error(frame)
         error_color, colorBool, areaColor = coloredLine.colored_error(roi)
 
         #print(area)
@@ -191,6 +191,7 @@ def thread_line_follow():
         if cx is not None:
 
             mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+            cv2.drawContours(mask, [largest], -1, 255, thickness=cv2.FILLED)
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             contour_pixels = hsv[mask == 255]
             # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)

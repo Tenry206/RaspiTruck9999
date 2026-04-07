@@ -110,7 +110,7 @@ class Camera:
 
         M = cv2.moments(largest)
         if M["m00"] == 0:
-            return None, thresh, None, turn, 0, roi
+            return None, thresh, None, turn, 0, roi, largest
 
         cx = int(M["m10"] / M["m00"])
         error = cx - self.frame_center
@@ -125,7 +125,7 @@ class Camera:
             elif cx > self.frame_center * 1.25: #432
                 turn = "LEFT"
 
-        return error_smoothed, thresh, cx, turn, area, roi
+        return error_smoothed, thresh, cx, turn, area, roi,largest
     
     # ------ display ------
     def display(self, frame, cx = None):
