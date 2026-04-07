@@ -48,11 +48,11 @@ def set_motor(motor_pwm, in1, in2, speed):
     speed = max(min(speed, 1), -1) 
 
     # 0.4 PWM Deadzone 
-    if 0 < speed < 0.4:
-        adjusted_speed = 0.4
+    if 0 < speed < 0.3:
+        adjusted_speed = 0.3
 
-    elif -0.4 < speed < 0:
-        adjusted_speed = -0.4
+    elif -0.3 < speed < 0:
+        adjusted_speed = -0.3
 
     else:
         adjusted_speed = speed
@@ -144,11 +144,11 @@ def thread_line_follow():
     # Added coloredLine to global so the thread can access your toilet() instance
     global cam, coloredLine
 
-    Kp = 11.6
+    Kp = 5
     Ki = 0
     Kd = 0.36
 
-    base_speed = 0.7
+    base_speed = 0.3 #0.7
     last_error = 0
     integral = 0
     dt = 0.02
