@@ -11,7 +11,7 @@ def build_templatesF(templates, orb):
     return templatesF
 
 def symbol_detect(frame_gray, templatesF, orb, matcher,
-                  RATIO=0.8, MIN_GOOD=12, MIN_INLIER=15, RANSAC_THRESH=5.0):
+                  RATIO=0.75, MIN_GOOD=15, MIN_INLIER=12, RANSAC_THRESH=4.0):
 
     vK, vD = orb.detectAndCompute(frame_gray, None)
     if vD is None or len(vD) < 2:
