@@ -184,7 +184,7 @@ def thread_line_follow():
         # --- NEW DEBUGGING BLOCK ---
         # ==========================================
         # 1. Debug the Black Line (We have the area and 'cx' centroid)
-        if error is not None and area >= 300:
+        if error is not None:
             # Convert frame to HSV to read the color
             hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             
