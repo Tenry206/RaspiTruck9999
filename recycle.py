@@ -148,7 +148,7 @@ def thread_line_follow():
     Ki = 0
     Kd = 0.36
 
-    base_speed = 0.4 #0.7
+    base_speed = 0.3 #0.7
     last_error = 0
     integral = 0
     dt = 0.02
@@ -262,9 +262,11 @@ def thread_vision():
             symbol_cooldown -=1
             sleep(0.01)
             continue
-        
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        detected_shapes, shape_thresh = process_shapes(frame)
+
+        h = frame.shape[0]
+        vision_roi = frame[0:int(h * 0.6), :]
+        frame_gray = cv2.cvtColor(vision_roi, cv2.COLOR_BGR2GRAY)
+        detected_shapes, shape_thresh = process_shapes(vision_roi)
 
         state.shape_mask = shape_thresh
 
