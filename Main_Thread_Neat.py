@@ -6,6 +6,7 @@ import threading
 from shared_state import SharedState
 from Symbol import symbol_detect, build_templatesF
 from Shape import process_shapes
+from ColouredLineError import toilet
 
 state = SharedState()
 
@@ -162,6 +163,7 @@ def thread_line_follow():
     while state.running:
 
         # ------ Capture Frame and Get PID error ------
+
         frame = cam.read()
         if frame is None:
             continue
@@ -177,6 +179,7 @@ def thread_line_follow():
             fps_start_time = current_time
 
         error, thresh, cx, turn, area = cam.get_error(frame)
+        error_color, colorBool = toilet.colored_error(frame)
 
         #print(area)
 
@@ -214,15 +217,27 @@ def thread_line_follow():
         else:
             lost_counter = 0
             current_error = error/2.5
+            current_color_error = error_color/2.5
 
         # ------ PID calculation ------
 
-        integral += current_error * dt
-        derivative = (current_error - last_error) / dt
+        if colorBool:
 
-        pid_output = Kp * current_error + Ki * integral + Kd * derivative
+            integral += current_color_error * dt
+            derivative = (current_color_error - last_error) / dt
 
-        last_error = current_error
+            pid_output = Kp * current_color_error + Ki * integral + Kd * derivative
+
+            last_error = current_color_error
+
+        else:
+
+            integral += current_error * dt
+            derivative = (current_error - last_error) / dt
+
+            pid_output = Kp * current_error + Ki * integral + Kd * derivative
+
+            last_error = current_error
 
         # ------ Compute motor speeds ------
 

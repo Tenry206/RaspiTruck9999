@@ -3,7 +3,7 @@ import numpy as np
 from Camera import Camera
 import math
 
-class ColouredLineError:
+class toilet:
 
     def __init__(self, frame_width = 640):
 
@@ -11,10 +11,11 @@ class ColouredLineError:
         
         self.lower_hsv = np.array([105, 110, 120])
         self.upper_hsv = np.array([130, 160, 180])
+        self.colorThresh = 2000
 
     def preprocess(self, frame):
         h = frame.shape[0]
-
+        colorBool = False
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         thresh = cv2.inRange(hsv, self.lower_hsv, self.upper_hsv)
@@ -27,4 +28,30 @@ class ColouredLineError:
         
     def colored_error(self, frame):
         thresh = self.preprocess(frame)
+
+        contours, _ = cv2.findContours(
+            thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+
+        turn = None
+
+        if not contours:
+            return None, thresh, None, turn,0
+
+        largest = max(contours, key=cv2.contourArea)
+        area = cv2.contourArea(largest)
+
+        M = cv2.moments(largest)
+        if M["m00"] == 0:
+            return None, thresh, None, turn, 0
+
+        cx = int(M["m10"] / M["m00"])
+        error = cx - self.frame_center
+        self.error_queue.append(error)
+        error_smoothed = int(np.mean(self.error_queue))
+
+        if error_smoothed > self.colorThresh:
+            colorBool = True
+
+        return error_smoothed, colorBool
         
