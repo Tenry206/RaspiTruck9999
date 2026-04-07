@@ -294,10 +294,14 @@ def thread_vision():
                 print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
 
                 if symbol !=None:
-                    print(symbol)
-                    if symbol == 'fingerprint':
+                    if symbol == 'fingerprint' or symbol == 'qr':
+                        print(symbol)
+
+                    elif symbol == 'recycle':
                         state.set_override('spongebob')
-                    #state.set_override('STOP')
+                    
+                    elif symbol == 'warning':
+                        state.set_override('STOP')
                     #sleep(1)
                     symbol_cooldown = 15 # Ignore symbols for 1.5 seconds (15 loops at 10fps)
                 break
@@ -311,10 +315,11 @@ def thread_motor():
 
         if override == 'STOP':
             stop()
+            sleep(1)
 
         elif override == 'spongebob':
             stop()
-            Turn(360, speed = 0.5 , clockwise = True)   
+            Turn(360, speed = 0.5, clockwise = True)   
 
         else:
             left,right = state.get_steering()
