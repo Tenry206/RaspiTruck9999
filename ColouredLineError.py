@@ -17,9 +17,9 @@ class toilet:
 
     def preprocess(self, frame):
         h = frame.shape[0]
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        self.hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        thresh = cv2.inRange(hsv, self.lower_hsv, self.upper_hsv)
+        thresh = cv2.inRange(self.hsv, self.lower_hsv, self.upper_hsv)
 
         kernel = np.ones((5, 5), np.uint8)
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
@@ -54,6 +54,16 @@ class toilet:
 
         if area > self.colorThresh:
             colorBool = True
+
+        saturation = self.hsv[:, :, 1]
+        mask = np.zeros(saturation.shape, np.uint8)
+        mean_val = cv2.mean(self.hsv, mask=mask)
+        h_avg = int(mean_val[0])
+        s_avg = int(mean_val[1])
+        v_avg = int(mean_val[2])
+        
+        print(h_avg, s_avg, v_avg)
+
 
         return error_smoothed, colorBool
         
