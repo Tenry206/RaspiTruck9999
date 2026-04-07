@@ -217,12 +217,13 @@ def thread_line_follow():
         else:
             lost_counter = 0
             current_error = error/2.5
-            current_color_error = error_color/2.5
+            
 
         # ------ PID calculation ------
 
         if colorBool:
-
+            
+            current_color_error = error_color/2.5
             integral += current_color_error * dt
             derivative = (current_color_error - last_error) / dt
 

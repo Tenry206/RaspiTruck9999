@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from Camera import Camera
 import math
+from collections import deque
 
 class toilet:
 
@@ -36,7 +37,7 @@ class toilet:
         turn = None
 
         if not contours:
-            return None, thresh, None, turn,0
+            return None, False
 
         largest = max(contours, key=cv2.contourArea)
         area = cv2.contourArea(largest)
