@@ -295,7 +295,7 @@ def thread_vision():
 
                 if symbol !=None:
                     print(symbol)
-                    if symbol == 'recycle':
+                    if symbol == 'fingerprint':
                         Turn(360, 1, True)
                     #state.set_override('STOP')
                     #sleep(1)
