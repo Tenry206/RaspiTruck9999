@@ -13,6 +13,7 @@ class toilet:
         self.lower_hsv = np.array([105, 110, 120])
         self.upper_hsv = np.array([130, 160, 180])
         self.colorThresh = 8000
+        self.error_queue = deque(maxlen = 2)
 
     def preprocess(self, frame):
         h = frame.shape[0]
