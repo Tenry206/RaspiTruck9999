@@ -7,6 +7,7 @@ from shared_state import SharedState
 from Symbol import symbol_detect, build_templatesF
 from Shape import process_shapes
 from ColouredLineError import toilet
+import numpy as np
 
 state = SharedState()
 
@@ -188,11 +189,18 @@ def thread_line_follow():
 
         hsv_frame = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
         if cx is not None:
+
+            mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            contour_pixels = hsv[mask == 255]
             # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
-            safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
-            h, s, v = hsv_frame[239, safe_cx]
+            safe_cx = max(0, min(roi.shape[1] - 1, int(cx))) # Prevent out-of-bounds crash
+            safe_y = roi.shape[0] - 1
+            mean_h = np.mean(contour_pixels[:, 0])
+            mean_s = np.mean(contour_pixels[:, 1])
+            mean_v = np.mean(contour_pixels[:, 2])
             
-            print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
+            print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{mean_h}, S:{mean_s}, V:{mean_v}]")
 
         if error is None or area < 300:
             lost_counter += 1
