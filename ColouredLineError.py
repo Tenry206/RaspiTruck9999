@@ -11,7 +11,7 @@ class toilet:
         
         self.lower_hsv = np.array([105, 110, 120])
         self.upper_hsv = np.array([130, 160, 180])
-        self.colorThresh = 2000
+        self.colorThresh = 8000
 
     def preprocess(self, frame):
         h = frame.shape[0]
@@ -50,7 +50,7 @@ class toilet:
         self.error_queue.append(error)
         error_smoothed = int(np.mean(self.error_queue))
 
-        if error_smoothed > self.colorThresh:
+        if area > self.colorThresh:
             colorBool = True
 
         return error_smoothed, colorBool
