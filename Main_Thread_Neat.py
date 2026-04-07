@@ -189,7 +189,7 @@ def thread_line_follow():
 
         hsv_frame = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
-        if largest is None:
+        if largest == 0:
             print("invalid contour")
         else:
             mask = np.zeros(roi.shape[:2], dtype=np.uint8)
@@ -202,8 +202,8 @@ def thread_line_follow():
             mean_h = np.mean(contour_pixels[:, 0])
             mean_s = np.mean(contour_pixels[:, 1])
             mean_v = np.mean(contour_pixels[:, 2])
+            print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{mean_h}, S:{mean_s}, V:{mean_v}]")
         
-        print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{mean_h}, S:{mean_s}, V:{mean_v}]")
         cv2.imshow("what the sigma", roi)
         if cv2.waitKey(1) == 27:
             cv2.destroyAllWindows()
