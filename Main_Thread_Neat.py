@@ -179,7 +179,7 @@ def thread_line_follow():
             fps_start_time = current_time
 
         error, thresh, cx, turn, area = cam.get_error(frame)
-        error_color, colorBool = coloredLine.colored_error(frame)
+        error_color, colorBool, areaColor = coloredLine.colored_error(frame)
 
         #print(area)
 
@@ -222,7 +222,7 @@ def thread_line_follow():
         # ------ PID calculation ------
 
         if colorBool:
-            
+
             current_color_error = error_color/2.5
             integral += current_color_error * dt
             derivative = (current_color_error - last_error) / dt

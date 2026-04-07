@@ -55,15 +55,6 @@ class toilet:
         if area > self.colorThresh:
             colorBool = True
 
-        saturation = self.hsv[:, :, 1]
-        mask = np.zeros(saturation.shape, np.uint8)
-        mean_val = cv2.mean(self.hsv, mask=mask)
-        h_avg = int(mean_val[0])
-        s_avg = int(mean_val[1])
-        v_avg = int(mean_val[2])
-        
-        print(h_avg, s_avg, v_avg)
 
-
-        return error_smoothed, colorBool
+        return error_smoothed, colorBool, area
         
