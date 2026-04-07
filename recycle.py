@@ -296,7 +296,7 @@ def thread_vision():
                 if symbol !=None:
                     print(symbol)
                     if symbol == 'fingerprint':
-                        Turn(360, 1, True)
+                        state.set_override('spongebob')
                     #state.set_override('STOP')
                     #sleep(1)
                     state.set_override('NONE')
@@ -313,7 +313,7 @@ def thread_motor():
         if override == 'STOP':
             stop()
 
-        elif override == 'SPIN_360':
+        elif override == 'spongebob':
             Turn(360, speed = 0.5 , clockwise = True)   
 
         else:
