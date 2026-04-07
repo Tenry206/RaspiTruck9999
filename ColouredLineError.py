@@ -38,7 +38,7 @@ class toilet:
         turn = None
 
         if not contours:
-            return None, False
+            return 0, False, 0
 
         largest = max(contours, key=cv2.contourArea)
         area = cv2.contourArea(largest)
