@@ -187,7 +187,7 @@ def thread_line_follow():
         # ------ Handle line lost ------
 
 
-        if error is None or area < 300:
+        if error is None and cx is not None or area < 300:
             lost_counter += 1
             hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             
