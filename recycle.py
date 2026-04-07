@@ -260,7 +260,7 @@ def thread_vision():
             continue
 
         h, w = frame.shape[:2]
-        vision_roi = frame[0:int(h * 0.7),int(w * 0.25):int(w * 0.75), :]
+        vision_roi = frame[0:int(h * 0.75),int(w * 0.2):int(w * 0.8), :]
         frame_gray = cv2.cvtColor(vision_roi, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(vision_roi)
 
