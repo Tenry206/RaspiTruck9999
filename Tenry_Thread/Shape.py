@@ -120,7 +120,7 @@ def process_shapes(frame):
             area = cv2.contourArea(c)
             
             # Look for a medium-to-large square (the black bounding box)
-            if 10000 < area < 20000: 
+            if 10000 < area < 30000: 
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
