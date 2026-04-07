@@ -178,7 +178,7 @@ def thread_line_follow():
 
         # ------ Get Errors ------
         error, thresh, cx, turn, area = cam.get_error(frame)
-        error_color, colorBool = coloredLine.colored_error(frame)
+        error_color, colorBool, activeColor = coloredLine.colored_error(frame)
 
         # ==========================================
         # --- NEW DEBUGGING BLOCK ---
