@@ -316,6 +316,7 @@ def thread_motor():
         if override == 'STOP':
             stop()
             sleep(1)
+            state.set_override('NONE')
 
         elif override == 'spongebob':
             stop()
