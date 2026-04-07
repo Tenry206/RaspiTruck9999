@@ -11,6 +11,8 @@ from ColouredLineErrorV2 import toilet
 from Face_Scanner import FaceScanner
 state = SharedState()
 
+if not hasattr(state, 'current_shape'):
+    state.current_shape = ""
 
 # ------ Templates ------
 
@@ -373,16 +375,14 @@ try:
                     for data in face_data_list:
                         fx, fy, fw, fh = data['box']
                         cv2.rectangle(display_frame, (fx, fy), (fx+fw, fy+fh), (0, 255, 0), 3)
-                        cv2.putText(display_frame, "FACE", (fx, fy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
                         
-                        for (ex, ey, ew, eh) in data['eyes']:
-                            cv2.rectangle(display_frame, (ex, ey), (ex+ew, ey+eh), (255, 0, 0), 2)
-                        for (mx, my, mw, mh) in data['mouths']:
-                            cv2.rectangle(display_frame, (mx, my), (mx+mw, my+mh), (0, 0, 255), 2)
+                        # Display the recognized Name and Confidence!
+                        text = f"{data['name']} {data['confidence']}"
+                        cv2.putText(display_frame, text, (fx, fy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
                 
                 # 3. Add the UI Prompts
                 cv2.putText(display_frame, f"Detected: {state.current_shape}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
-                cv2.putText(display_frame, "PRESS 'C' TO CONTINUE", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                cv2.putText(display_frame, "PRESS 'C' TO RESUME DRIVING", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
                 
                 # 4. Open the dedicated window
                 cv2.imshow("Facial Recognition Checkpoint", display_frame)

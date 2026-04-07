@@ -4,78 +4,61 @@ import urllib.request
 
 class FaceScanner:
     def __init__(self):
-        print("Initializing OpenCV Haar Cascade Face & Feature Detection...")
+        print("Initializing OpenCV LBPH Face Recognizer...")
         
-        # We scale the image down by 2 (640->320) to save CPU. 
-        # We must multiply the coordinates by 2 later to draw them correctly!
-        self.scale = 2 
+        # 1. Load the Haar Cascade for Face Detection
+        xml_name = 'haarcascade_frontalface_default.xml'
+        if not os.path.exists(xml_name):
+            url = f"https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/{xml_name}"
+            urllib.request.urlretrieve(url, xml_name)
+        self.face_cascade = cv2.CascadeClassifier(xml_name)
+        
+        # 2. Load the LBPH Face Recognizer (The Brain)
+        self.recognizer = cv2.face.LBPHFaceRecognizer_create()
+        if os.path.exists('trainer.yml'):
+            self.recognizer.read('trainer.yml')
+            self.model_loaded = True
+        else:
+            self.model_loaded = False
+            print("WARNING: trainer.yml not found. Recognition will not work!")
 
-        # The AI models we need for faces, eyes, and mouths (smiles)
-        cascades = {
-            'face': 'haarcascade_frontalface_default.xml',
-            'eye': 'haarcascade_eye.xml',
-            'mouth': 'haarcascade_smile.xml'
-        }
-        
-        self.models = {}
-        
-        # Download and load all models
-        for key, xml_name in cascades.items():
-            if not os.path.exists(xml_name):
-                print(f"Downloading {xml_name}...")
-                url = f"https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/{xml_name}"
-                urllib.request.urlretrieve(url, xml_name)
-            
-            self.models[key] = cv2.CascadeClassifier(xml_name)
+        # 3. --- SET YOUR NAMES HERE ---
+        # ID 0 is empty. ID 1 is the first name, ID 2 is the second name, etc.
+        self.names = ['None', 'Tenry', 'Partner Name'] 
 
     def scan_for_face(self, frame):
-        """
-        Scans for faces, and then sub-scans for eyes and mouths.
-        Returns: (Boolean face_found, List of face_data dictionaries)
-        """
-        # 1. Downscale to save massive CPU power
-        small_frame = cv2.resize(frame, (320, 240))
-        gray = cv2.cvtColor(small_frame, cv2.COLOR_BGR2GRAY)
+        # We need grayscale for LBPH Recognition
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        # 2. Find the faces first
-        faces = self.models['face'].detectMultiScale(gray, 1.1, 5, minSize=(30, 30))
-        
+        # Find faces in the frame
+        faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5, minSize=(50, 50))
         results = []
         
         for (x, y, w, h) in faces:
-            # Create a dictionary to hold all the coordinates (Scaled up by x2)
-            face_data = {
-                'box': (x * self.scale, y * self.scale, w * self.scale, h * self.scale),
-                'eyes': [],
-                'mouths': []
-            }
+            name = "Unknown"
+            confidence_text = ""
             
-            # --- ROI SUB-SCANNING ---
-            # Crop the image down to JUST the face to find the eyes/mouth
-            roi_gray = gray[y:y+h, x:x+w]
-            
-            # Find Eyes inside the face
-            eyes = self.models['eye'].detectMultiScale(roi_gray, 1.1, 15, minSize=(10, 10))
-            for (ex, ey, ew, eh) in eyes:
-                face_data['eyes'].append((
-                    (x + ex) * self.scale, 
-                    (y + ey) * self.scale, 
-                    ew * self.scale, 
-                    eh * self.scale
-                ))
+            # If the brain is loaded, try to recognize the cropped face
+            if self.model_loaded:
+                id, confidence = self.recognizer.predict(gray[y:y+h, x:x+w])
                 
-            # Find Mouth (Smile) inside the lower half of the face
-            roi_lower_face = gray[y + h//2 : y + h, x : x + w]
-            mouths = self.models['mouth'].detectMultiScale(roi_lower_face, 1.5, 15, minSize=(15, 15))
-            for (mx, my, mw, mh) in mouths:
-                face_data['mouths'].append((
-                    (x + mx) * self.scale, 
-                    (y + (h//2) + my) * self.scale, # Add the lower half offset back
-                    mw * self.scale, 
-                    mh * self.scale
-                ))
-
-            results.append(face_data)
+                # In LBPH, 0 confidence is a perfect match. 
+                # Anything under 80 is usually a good, recognizable match.
+                if confidence < 80:
+                    try:
+                        name = self.names[id]
+                    except IndexError:
+                        name = f"ID: {id}"
+                    confidence_text = f" {round(100 - confidence)}%"
+                else:
+                    name = "Unknown Person"
+                    confidence_text = f" {round(100 - confidence)}%"
+            
+            results.append({
+                'box': (x, y, w, h),
+                'name': name,
+                'confidence': confidence_text
+            })
             
         if len(results) > 0:
             return True, results
