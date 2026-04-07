@@ -35,7 +35,7 @@ def detect_shape(cnt):
             return 'Trapezium', ar, A, P, C, verts
         elif 10000<A<18500 and 0.68<C<0.8:
             return 'Diamond' ,ar, A, P, C, verts   
-    elif verts == 6 and 10000<A <12000 and 0.74<C<0.8:
+    elif verts == 6 and 9000<A <12000 and 0.74<C<0.8:
         if 0.76<C<0.9 :
             return 'Semicircle', ar, A, P, C, verts
         elif 0.2<C<0.26:
@@ -92,10 +92,10 @@ def process_shapes(frame):
     
     # 1. Adaptive Thresholding: Perfect for finding thin lines on varying backgrounds!
     # It compares a pixel to its neighbors (21x21 block), pulling out the thin box.
-    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 21, 5)
+    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
     
     # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
-    line_kernel = np.ones((15, 15), np.uint8)
+    line_kernel = np.ones((11, 11), np.uint8)
     thin_line_mask = cv2.morphologyEx(thin_line_mask, cv2.MORPH_CLOSE, line_kernel)
 
     # --- NEW: TEMPORARY DEBUG WINDOWS ---
@@ -120,7 +120,7 @@ def process_shapes(frame):
             area = cv2.contourArea(c)
             
             # Look for a medium-to-large square (the black bounding box)
-            if 10000 < area < 80000: 
+            if 10000 < area < 20000: 
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
