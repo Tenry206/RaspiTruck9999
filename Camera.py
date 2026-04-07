@@ -84,13 +84,13 @@ class Camera:
         
         _, thresh = cv2.threshold(blur, 90, 255, cv2.THRESH_BINARY_INV)
 
-        return thresh, roi_y
+        return thresh, roi_y, roi
     
     
     # ------ Core Logic ------
 
     def get_error(self, frame):
-        thresh, roi_y = self.preprocess(frame)
+        thresh, roi_y, roi = self.preprocess(frame)
 
         contours, _ = cv2.findContours(
             thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
@@ -110,7 +110,7 @@ class Camera:
 
         M = cv2.moments(largest)
         if M["m00"] == 0:
-            return None, thresh, None, turn, 0
+            return None, thresh, None, turn, 0, roi
 
         cx = int(M["m10"] / M["m00"])
         error = cx - self.frame_center
@@ -125,7 +125,7 @@ class Camera:
             elif cx > self.frame_center * 1.25: #432
                 turn = "LEFT"
 
-        return error_smoothed, thresh, cx, turn, area
+        return error_smoothed, thresh, cx, turn, area, roi
     
     # ------ display ------
     def display(self, frame, cx = None):

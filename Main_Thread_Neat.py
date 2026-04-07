@@ -178,8 +178,8 @@ def thread_line_follow():
             fps_frame_count = 0
             fps_start_time = current_time
 
-        error, thresh, cx, turn, area = cam.get_error(frame)
-        error_color, colorBool, areaColor = coloredLine.colored_error(frame)
+        error, thresh, cx, turn, area, roi = cam.get_error(frame)
+        error_color, colorBool, areaColor = coloredLine.colored_error(roi)
 
         #print(area)
 
