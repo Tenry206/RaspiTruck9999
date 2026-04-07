@@ -10,8 +10,8 @@ class toilet:
 
         self.frame_center = frame_width // 2
         
-        self.lower_hsv = np.array([105, 110, 120])
-        self.upper_hsv = np.array([130, 160, 180])
+        self.lower_hsv = np.array([0, 0, 0])
+        self.upper_hsv = np.array([239, 239, 239])
         self.colorThresh = 8000
         self.error_queue = deque(maxlen = 2)
 
