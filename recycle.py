@@ -8,7 +8,12 @@ from Symbol import symbol_detect, build_templatesF
 from Shape import process_shapes
 from ColouredLineErrorV2 import toilet
 
+from Face_Scanner import FaceScanner
+
 state = SharedState()
+
+if not hasattr(state, 'current_shape'):
+    state.current_shape = ""
 
 
 # ------ Templates ------
@@ -281,9 +286,9 @@ def thread_vision():
 
             elif shape['label'] != 'Noise':
                 #print(f"Detected Shape: {shape['label']}")
-                state.set_override('STOP')
-                sleep(1)
-                state.set_override('NONE') 
+                state.set_override('FACE_SCAN')
+                while state.get_override() == 'FACE_SCAN' and state.running:
+                    sleep(0.1)
                 break
 
             elif shape['label'] == 'Noise':
@@ -355,6 +360,7 @@ orb = cv2.ORB_create(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
 
+face_scanner = FaceScanner()
 print("Starting Threads ...")
 
 threads = [
@@ -371,15 +377,50 @@ try:
         display_frame = state.get_frame()
 
         if display_frame is not None:
-            cv2.imshow("Robot View", display_frame)
-            cv2.imshow("Vision ROI", vision_roi)
+            override = state.get_override()
+            # ===============================================
+            # FACIAL RECOGNITION MODE
+            # ===============================================
+            if override == 'FACE_SCAN':
+                
+                # 1. Run the Scanner Math
+                is_face_found, face_data_list = face_scanner.scan_for_face(display_frame)
+                
+                # 2. Draw the boxes and text
+                if is_face_found:
+                    for data in face_data_list:
+                        fx, fy, fw, fh = data['box']
+                        cv2.rectangle(display_frame, (fx, fy), (fx+fw, fy+fh), (0, 255, 0), 3)
+                        
+                        # Display the recognized Name and Confidence!
+                        text = f"{data['name']} {data['confidence']}"
+                        cv2.putText(display_frame, text, (fx, fy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                
+                # 3. Add the UI Prompts
+                cv2.putText(display_frame, f"Detected: {state.current_shape}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
+                cv2.putText(display_frame, "PRESS 'C' TO RESUME DRIVING", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                
+                # 4. Open the dedicated window
+                cv2.imshow("Facial Recognition Checkpoint", display_frame)
+                
+                # 5. Listen for the 'C' key!
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('c'):
+                    print("Continue authorized by user. Resuming path...")
+                    cv2.destroyWindow("Facial Recognition Checkpoint")
+                    state.set_override('NONE') # This wakes all threads back up!
+                elif key == ord('q'):
+                    state.running = False
+            else:        
+                cv2.imshow("Robot View", display_frame)
+                cv2.imshow("Vision ROI", vision_roi)
 
-            if hasattr(state, 'shape_mask') and state.shape_mask is not None:
-                cv2.imshow("Linked Threshold Mask", state.shape_mask)
+                if hasattr(state, 'shape_mask') and state.shape_mask is not None:
+                    cv2.imshow("Linked Threshold Mask", state.shape_mask)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                print("Quit triggered ...")
-                state.running = False
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    print("Quit triggered ...")
+                    state.running = False
 
 except KeyboardInterrupt:
 
