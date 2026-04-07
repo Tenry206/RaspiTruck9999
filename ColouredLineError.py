@@ -10,8 +10,8 @@ class toilet:
 
         self.frame_center = frame_width // 2
         
-        self.lower_hsv = np.array([0, 0, 0])
-        self.upper_hsv = np.array([239, 239, 239])
+        self.lower_yellow = np.array([85, 100, 205])
+        self.upper_yellow = np.array([105, 255, 255])
         self.colorThresh = 8000
         self.error_queue = deque(maxlen = 2)
 
@@ -19,7 +19,7 @@ class toilet:
         h = frame.shape[0]
         self.hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        thresh = cv2.inRange(self.hsv, self.lower_hsv, self.upper_hsv)
+        thresh = cv2.inRange(self.hsv, self.lower_yellow, self.upper_yellow)
 
         kernel = np.ones((5, 5), np.uint8)
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
