@@ -190,7 +190,7 @@ def thread_line_follow():
         if cx is not None:
             # Sample the exact pixel at the center of the line (y=400 is deep in your ROI)
             safe_cx = max(0, min(639, int(cx))) # Prevent out-of-bounds crash
-            h, s, v = hsv_frame[240, safe_cx]
+            h, s, v = hsv_frame[239, safe_cx]
             
             print(f"DEBUG BLACK -> Area: {area:.0f} | Point HSV: [H:{h}, S:{s}, V:{v}]")
 
