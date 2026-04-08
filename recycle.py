@@ -297,9 +297,8 @@ def thread_vision():
 
             elif shape['label'] != 'Noise':
                 #print(f"Detected Shape: {shape['label']}")
-                state.set_override('FACE_SCAN')
-                while state.get_override() == 'FACE_SCAN' and state.running:
-                    sleep(0.1)
+                #state.set_override('FACE_SCAN')
+                state.set_override('STOP')
                 break
 
             elif shape['label'] == 'Noise':
@@ -310,7 +309,7 @@ def thread_vision():
 
                 orb_delay = (time() - orb_start_time) *1000
                 #print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
-
+                print(symbol)
                 if symbol !=None:
                     if symbol == 'fingerprint' or symbol == 'qr':
                         state.set_override('FACE_SCAN')
