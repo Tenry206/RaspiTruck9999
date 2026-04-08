@@ -7,6 +7,7 @@ from shared_state import SharedState
 from Symbol import symbol_detect, build_templatesF
 from Shape import process_shapes
 from ColouredLineErrorV2 import toilet
+import numpy as np
 
 from Face_Scanner import FaceScanner
 
@@ -62,11 +63,11 @@ def set_motor(motor_pwm, in1, in2, speed):
     speed = max(min(speed, 1), -1) 
 
     # 0.4 PWM Deadzone 
-    if 0 < speed < 0.25:
-        adjusted_speed = 0.25
+    if 0 < speed < 0.23:
+        adjusted_speed = 0.23
 
-    elif -0.25 < speed < 0:
-        adjusted_speed = -0.25
+    elif -0.23 < speed < 0:
+        adjusted_speed = -0.23
 
     else:
         adjusted_speed = speed
@@ -162,7 +163,7 @@ def thread_line_follow():
     Ki = 0
     Kd = 0.36
 
-    base_speed = 0.25 #0.7
+    base_speed = 0.23 #0.7
     last_error = 0
     integral = 0
     dt = 0.02
@@ -304,6 +305,19 @@ def thread_vision():
             elif shape['label'] == 'Noise':
                 orb_start_time = time()
 
+                cnt = shape['contour']
+                mask = np.zeros(vision_roi.shape[:2], dtype=np.uint8)
+                cv2.drawContours(mask, [cnt], -1, 255, thickness=cv2.FILLED)
+
+                masked = cv2.bitwise_and(vision_roi, vision_roi, mask=mask)
+                x, y, w, h = cv2.boundingRect(cnt)
+                symbol_roi = masked[y:y+h, x:x+w]
+                symbol_gray = cv2.cvtColor(symbol_roi, cv2.COLOR_BGR2GRAY)
+
+                symbol = symbol_detect(symbol_gray, templatesF, orb, matcher)
+
+                print(f"Detected Symbol: {symbol}")
+
                 symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
 
                 orb_delay = (time() - orb_start_time) *1000
@@ -370,9 +384,9 @@ def thread_motor():
 
 print("Initializing System ...")
 
-cam = Camera(resolution=(640,480), fps=60)
+cam = Camera(resolution=(640,480), fps=30)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=2200, fastThreshold=18, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=1000, fastThreshold=25, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)

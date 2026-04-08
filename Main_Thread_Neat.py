@@ -6,7 +6,7 @@ import threading
 from shared_state import SharedState
 from Symbol import symbol_detect, build_templatesF
 from Shape import process_shapes
-from ColouredLineError import toilet
+from tests.ColouredLineError import toilet
 import numpy as np
 
 state = SharedState()
