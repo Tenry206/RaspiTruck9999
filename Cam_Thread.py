@@ -421,7 +421,7 @@ print("Initializing System ...")
 cam = Camera(resolution=(640,480), fps=60)
 coloredLine = toilet()
 #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
-orb = cv2.ORB_create(nfeatures=1700, fastThreshold=16, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=1600, fastThreshold=18, nlevels=12, scaleFactor=1.2, patchSize=31)
 #orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.15, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
