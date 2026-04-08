@@ -23,7 +23,7 @@ class Camera:
         # --- NEw: Hardware tuning for motion blu ---
         print("Aplying High-Speed Shutter Config")
         self.picam2.set_controls({
-            "ExposureTime": 5000, # microseconds
+            "ExposureTime": 2000, # microseconds
             "AnalogueGain": 25.0,
             "AeEnable": False,
         })

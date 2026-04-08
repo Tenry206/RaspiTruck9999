@@ -258,7 +258,7 @@ def thread_line_follow():
         state.set_steering(left_speed, right_speed)
 
         # 50 FPS Limit
-        sleep(dt)
+        sleep(0.05)
 
 def thread_vision():
 
@@ -454,8 +454,8 @@ try:
                 elif key == ord('q'):
                     state.running = False
             else:        
-                cv2.imshow("Robot View", display_frame)
-                cv2.imshow("Vision ROI", vision_roi)
+                #cv2.imshow("Robot View", display_frame)
+                #cv2.imshow("Vision ROI", vision_roi)
 
                 if hasattr(state, 'shape_mask') and state.shape_mask is not None:
                     cv2.imshow("Linked Threshold Mask", state.shape_mask)

@@ -47,6 +47,8 @@ def detect_shape(cnt):
             return '3/4 Circle', ar, A, P, C, verts
         elif 0.76<C<0.9:
             return 'Semicircle',ar, A, P, C, verts
+        elif A>10000:
+            return 'recycle', ar, A, P, C, verts
     elif verts == 8 :
         if 0.8<C<1.0:
             return 'Octagon' ,ar, A, P, C, verts
@@ -54,6 +56,8 @@ def detect_shape(cnt):
             return '3/4 Circle', ar, A, P, C, verts
         elif 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
+        elif A>10000:
+            return 'recycle', ar, A, P, C, verts
     elif verts == 10:
         if 0.25<C<0.30 and A<8000:
             return 'Star' ,ar, A, P, C, verts
@@ -198,16 +202,16 @@ def process_shapes(frame):
         direction = "None"
         #detected_color = "Unknown"
 
-        h_avg, s_avg, v_avg = 0, 0, 0
+        #h_avg, s_avg, v_avg = 0, 0, 0
         
         if shape_label != 'Noise':
             # Color detection logic
-            mask = np.zeros(saturation.shape, np.uint8)
-            cv2.drawContours(mask, [cnt], -1, 255, -1)
-            mean_val = cv2.mean(hsv, mask=mask)
-            h_avg = int(mean_val[0])
-            s_avg = int(mean_val[1])
-            v_avg = int(mean_val[2])
+            #mask = np.zeros(saturation.shape, np.uint8)
+            #cv2.drawContours(mask, [cnt], -1, 255, -1)
+            #mean_val = cv2.mean(hsv, mask=mask)
+            #h_avg = int(mean_val[0])
+            #s_avg = int(mean_val[1])
+            #v_avg = int(mean_val[2])
             
             '''
             for color_name, (lower, upper) in color_ranges.items():
@@ -236,7 +240,7 @@ def process_shapes(frame):
                     dy = tip_y - cy
                     if abs(dx) > abs(dy):
                         direction = 'Right' if dx>0 else "Left"
-                    else:direction = "Down" if dy > 0 else "Up"
+                    #else:direction = "Down" if dy > 0 else "Up"
 
 
         if shape_label != 'Noise' or (shape_label == 'Noise' and area > 1000):
@@ -246,7 +250,8 @@ def process_shapes(frame):
                 'direction': direction,
                 'contour': cnt,
                 'area': area,
-                'hsv': (h_avg, s_avg, v_avg)
+                'hsv': (0, 0, 0)
+                #'hsv': (h_avg, s_avg, v_avg)
             })
     return results, thresh
 
