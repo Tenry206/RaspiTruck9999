@@ -347,8 +347,6 @@ def thread_vision():
 
                 print(f"Detected Symbol: {symbol}")
 
-                symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
-
                 orb_delay = (time() - orb_start_time) *1000
                 #print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
                 print(f"Detected Symbol: {symbol}")
