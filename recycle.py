@@ -27,10 +27,12 @@ templates = {
     'button': cv2.imread('symbols/button.png', 0),
     'fingerprint': cv2.imread('symbols/fingerprint.png', 0),
     'qr': cv2.imread('symbols/qr.png', 0),
-    'recycle': cv2.imread('symbols/recycle.png', 0),
-    'recycle2': cv2.imread('symbols/recycle(1).png'),
-    'recycle3': cv2.imread('symbols/recycle(1)(1).png'),
-    'recycle4': cv2.imread('symbols/recycle(1)(1)(1).png'),
+   '''
+     'recycle': cv2.imread('symbols/recycle.png', 0),
+    'recycle2': cv2.imread('symbols/recycle(1).png', 0),
+    'recycle3': cv2.imread('symbols/recycle(1)(1).png', 0),
+    'recycle4': cv2.imread('symbols/recycle(1)(1)(1).png', 0),
+    '''
     'warning': cv2.imread('symbols/warning.png', 0)
 }
 
@@ -289,6 +291,9 @@ def thread_vision():
                     state.set_override('SPIN_RIGHT')
                 break  
 
+            if shape['label'] == 'recycle':
+                state.set_override('spongebob')
+
             elif shape['label'] != 'Noise':
                 #print(f"Detected Shape: {shape['label']}")
                 #state.set_override('FACE_SCAN')
@@ -310,9 +315,6 @@ def thread_vision():
                         while state.get_override == 'FACE_SCAN' and state.running:
                             sleep(0.1)
                         #print(symbol)
-
-                    elif symbol == 'recycle' or symbol == 'recycle2' or symbol == 'recycle3' or symbol == 'recycle4':
-                        state.set_override('spongebob')
                     
                     elif symbol == 'warning' or symbol == 'button':
                         state.set_override('STOP')
