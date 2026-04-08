@@ -275,7 +275,7 @@ def thread_vision():
 
         h, w = frame.shape[:2]
         vision_roi = frame[0:h, 0:w, :] #[int(h * 0.0):int(h * 0.9),int(w * 0.2):int(w * 0.8), :]
-        resized_roi = cv2.resize(vision_roi, None, fx = 0.8, fy = 0.8)
+        resized_roi = cv2.resize(vision_roi, None, fx = 0.775, fy = 0.775)
         frame_gray = cv2.cvtColor(resized_roi, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(vision_roi)
 
@@ -372,7 +372,7 @@ print("Initializing System ...")
 
 cam = Camera(resolution=(640,480), fps=60)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
