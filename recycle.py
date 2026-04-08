@@ -291,13 +291,13 @@ def thread_vision():
                     state.set_override('SPIN_RIGHT')
                 break  
 
-            if shape['label'] == 'recycle':
+            elif shape['label'] == 'recycle':
                 state.set_override('spongebob')
 
             elif shape['label'] != 'Noise':
                 #print(f"Detected Shape: {shape['label']}")
                 #state.set_override('FACE_SCAN')
-
+                state.set_override('STOP')
                 print(f"Shape detected: {shape['label']}")
                 break
 
@@ -363,9 +363,9 @@ def thread_motor():
 
 print("Initializing System ...")
 
-cam = Camera(resolution=(640,480), fps=60)
+cam = Camera(resolution=(640,480), fps=30)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=1000, fastThreshold=30, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=2200, fastThreshold=12, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
