@@ -311,10 +311,10 @@ def thread_vision():
                 print(symbol)
                 if symbol !=None:
                     if symbol == 'fingerprint' or symbol == 'qr':
-                        state.set_override('FACE_SCAN')
-                        while state.get_override == 'FACE_SCAN' and state.running:
-                            sleep(0.1)
-                        #print(symbol)
+                        #state.set_override('FACE_SCAN')
+                        #while state.get_override == 'FACE_SCAN' and state.running:
+                            #sleep(0.1)
+                        print(symbol)
                     
                     elif symbol == 'warning' or symbol == 'button':
                         state.set_override('STOP')
