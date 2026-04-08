@@ -384,9 +384,9 @@ def thread_motor():
 
 print("Initializing System ...")
 
-cam = Camera(resolution=(640,480), fps=30)
+cam = Camera(resolution=(640,480), fps=60)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=1800, fastThreshold=15, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
