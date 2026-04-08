@@ -129,7 +129,9 @@ def Turn(angle, speed = 0.5 , clockwise = True):
     sleep(turn_time)
     Move(0,0)
 
+
 # ------ Camera Thread ------ 
+
 
 def thread_camera():
     global cam
@@ -141,7 +143,7 @@ def thread_camera():
             state.update_frame(frame)
 
 
-# ------ PID parameters ------
+# ------ Line Following Thread ------
 
 
 def thread_line_follow():
@@ -164,7 +166,7 @@ def thread_line_follow():
     fps_frame_count = 0
 
     while state.running:
-        # ------ Capture Frame ------
+        
 
         if state.get_override() == 'FACE_SCAN':
             sleep(0.1)
@@ -299,7 +301,7 @@ def thread_vision():
                 state.set_override('STOP')
 
             elif shape['label'] == 'qr' or shape['label'] == 'fingerprint':
-                print('what the significant figures')
+                print(shape['label'])
                 state.set_override('FACE_SCAN')
 
         # 10 FPS
