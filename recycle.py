@@ -338,9 +338,11 @@ def thread_vision():
                             sleep(0.1)
                         #state.set_override("squidward")
                         print(symbol)
+                        symbol_cooldown = 10
                     
                     elif symbol == 'warning' or symbol == 'button':
                         state.set_override('STOP')
+                        symbol_cooldown = 10
                 break
 
         # 10 FPS
