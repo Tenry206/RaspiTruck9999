@@ -175,16 +175,17 @@ def thread_line_follow():
     fps_frame_count = 0
 
     while state.running:
-        if state.get_override() == 'FACE_SCAN':
-            sleep(0.1)
-            continue
-
         # ------ Capture Frame ------
         frame = cam.read()
         if frame is None:
             continue
-
         state.update_frame(frame)
+        
+        if state.get_override() == 'FACE_SCAN':
+            sleep(0.1)
+            continue
+
+        
         fps_frame_count +=1
         current_time = time()
 

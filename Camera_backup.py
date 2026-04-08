@@ -60,7 +60,7 @@ class Camera:
         cv2.destroyAllWindows()
 
 
-    # ------ Processing
+    # ------ Processing ------
 
     def preprocess(self, frame):
         # ROI + grayscale + blur + binary
