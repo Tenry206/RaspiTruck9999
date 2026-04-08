@@ -298,7 +298,7 @@ def thread_vision():
             elif shape['label'] == 'warning' or shape['label'] == 'button':
                 state.set_override('STOP')
 
-            elif shape['label'] == 'qr' or shape['label'] == 'fingerprint'
+            elif shape['label'] == 'qr' or shape['label'] == 'fingerprint':
                 state.set_override('FACE_SCAN')
 
         # 10 FPS
