@@ -19,26 +19,20 @@ if not hasattr(state, 'current_shape'):
 # ------ Templates ------
 
 
-template_groups = {
-    'button': ['symbols/button.png'],
-    'fingerprint': ['symbols/fingerprint.png'],
-    'qr': ['symbols/qr.png'],
-    'recycle': ['symbols/recycle.png', 'symbols/recycle(1).png', 'symbols/recycle(1)(1).png'],
-    'warning': ['symbols/warning.png']
+
+# ------ Templates ------
+
+
+templates = {
+    'button': cv2.imread('symbols/button.png', 0),
+    'fingerprint': cv2.imread('symbols/fingerprint.png', 0),
+    'qr': cv2.imread('symbols/qr.png', 0),
+    'recycle': cv2.imread('symbols/recycle.png', 0),
+    'recycle2': cv2.imread('symbols/recycle(1).png'),
+    'recycle3': cv2.imread('symbols/recycle(1)(1).png'),
+    'recycle4': cv2.imread('symbols/recycle(1)(1)(1).png'),
+    'warning': cv2.imread('symbols/warning.png', 0)
 }
-
-templates = {}
-template_alias = {}
-for label, paths in template_groups.items():
-    for i, path in enumerate(paths):
-        img = cv2.imread(path, 0)
-        if img is None:
-            continue
-
-        # Keep each variant unique for matching, then map back to one class label.
-        key = label if i == 0 else f"{label}__{i + 1}"
-        templates[key] = img
-        template_alias[key] = label
 
 
 # ------ Motor A GPIO setup ------
@@ -278,7 +272,7 @@ def thread_vision():
             continue
 
         h, w = frame.shape[:2]
-        vision_roi = frame[int(h * 0.0):int(h * 0.9),int(w * 0.2):int(w * 0.8), :]
+        vision_roi = frame[0:h, 0:w, :] #[int(h * 0.0):int(h * 0.9),int(w * 0.2):int(w * 0.8), :]
         resized_roi = cv2.resize(vision_roi, None, fx = 0.775, fy = 0.775)
         frame_gray = cv2.cvtColor(resized_roi, cv2.COLOR_BGR2GRAY)
         detected_shapes, shape_thresh = process_shapes(vision_roi)
@@ -305,7 +299,6 @@ def thread_vision():
                 orb_start_time = time()
 
                 symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
-                symbol = template_alias.get(symbol, symbol)
 
                 orb_delay = (time() - orb_start_time) *1000
                 #print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
@@ -315,9 +308,9 @@ def thread_vision():
                         state.set_override('FACE_SCAN')
                         while state.get_override == 'FACE_SCAN' and state.running:
                             sleep(0.1)
-                        print(symbol)
+                        #print(symbol)
 
-                    elif symbol == 'recycle':
+                    elif symbol == 'recycle' or symbol == 'recycle2' or symbol == 'recycle3' or symbol == 'recycle4':
                         state.set_override('spongebob')
                     
                     elif symbol == 'warning' or symbol == 'button':
@@ -328,7 +321,7 @@ def thread_vision():
         sleep(0.01)
 
         fps = 1.0 / (time() - start)
-        #print(fps)
+        print(fps)
 
 def thread_motor():
     while state.running:
@@ -369,7 +362,7 @@ print("Initializing System ...")
 
 cam = Camera(resolution=(640,480), fps=60)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=500, fastThreshold=40, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=1000, fastThreshold=30, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)

@@ -79,14 +79,14 @@ class toilet:
             # If the black area is large (> 1000), it means we have crossed the gap 
             # and landed safely on the black track. Cancel persistence instantly!
             if black_area > 1000:
-                print(f"BLACK TRACK DETECTED! Aborting {self.active_color} coasting.")
+                #print(f"BLACK TRACK DETECTED! Aborting {self.active_color} coasting.")
                 self.color_persistence = 0
                 self.active_color = None
                 return None, False, None
 
             # Otherwise, keep coasting
             self.color_persistence -= 1
-            print(f"COASTING ({self.active_color})... Persistence left: {self.color_persistence}")
+            #print(f"COASTING ({self.active_color})... Persistence left: {self.color_persistence}")
             return self.last_known_error, True, self.active_color
                 
         # 3. DEFAULT (No color, no persistence)
