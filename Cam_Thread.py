@@ -348,7 +348,7 @@ def thread_vision():
                 symbol_roi = masked[y:y+h, x:x+w]
                 symbol_gray = cv2.cvtColor(symbol_roi, cv2.COLOR_BGR2GRAY)
 
-                symbol = symbol_detect(symbol_gray, templatesF, orb, matcher)
+                symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
 
                 print(f"Detected Symbol: {symbol}")
 
