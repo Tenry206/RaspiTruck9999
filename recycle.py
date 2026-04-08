@@ -345,6 +345,10 @@ def thread_motor():
             Turn(30, speed = 1, clockwise = True)
             Turn(30, speed = 1, clockwise = False)
             Turn(30, speed = 1, clockwise = True)
+            Turn(30, speed = 1, clockwise = True)
+            Turn(30, speed = 1, clockwise = False)
+            Turn(30, speed = 1, clockwise = True)
+            state.set_override('NONE')
         elif override == 'SPIN_LEFT':
             Turn(80, speed = 1, clockwise = False)
             print('left')
