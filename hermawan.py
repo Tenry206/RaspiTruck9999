@@ -299,6 +299,7 @@ def thread_vision():
                 state.set_override('STOP')
 
             elif shape['label'] == 'qr' or shape['label'] == 'fingerprint':
+                print('what the significant figures')
                 state.set_override('FACE_SCAN')
 
         # 10 FPS
