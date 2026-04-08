@@ -432,6 +432,7 @@ try:
                 if hasattr(state, 'shape_mask') and state.shape_mask is not None:
                     cv2.imshow("Linked Threshold Mask", state.shape_mask)
 
+
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("Quit triggered ...")
                     state.running = False
