@@ -292,7 +292,8 @@ def thread_vision():
             elif shape['label'] != 'Noise':
                 #print(f"Detected Shape: {shape['label']}")
                 #state.set_override('FACE_SCAN')
-                state.set_override('STOP')
+
+                print(f"Shape detected: {shape['label']}")
                 break
 
             elif shape['label'] == 'Noise':
