@@ -175,6 +175,9 @@ def thread_line_follow():
     fps_frame_count = 0
 
     while state.running:
+        if state.get_override() == 'FACE_SCAN':
+            sleep(0.1)
+            continue
 
         # ------ Capture Frame ------
         frame = cam.read()
@@ -328,11 +331,10 @@ def thread_vision():
                 print(f"Detected Symbol: {symbol}")
                 if symbol !=None:
                     if symbol == 'fingerprint' or symbol == 'qr':
+                        print(f"Triggering Face Scan for: {symbol}")
                         state.set_override('FACE_SCAN')
                         while state.get_override == 'FACE_SCAN' and state.running:
-                            state.set_override('STOP')
-                            sleep(1)
-                            state.set_override(None)
+                            sleep(0.1)
                         #state.set_override("squidward")
                         print(symbol)
                     
@@ -354,17 +356,18 @@ def thread_motor():
             stop()
             sleep(1)
             state.set_override('NONE')
-
+        elif override == 'FACE_SCAN':
+            stop()
         elif override == 'spongebob':
             stop()
             Turn(450, speed = 1, clockwise = True) 
             state.set_override('NONE')
-
-        elif override == 'squidward':
-            Turn(30, speed = 1, clockwise = True)
-            Turn(30, speed = 1, clockwise = False)
-            Turn(30, speed = 1, clockwise = True)
-            state.set_override('NONE')
+        
+#        elif override == 'squidward':
+#            Turn(30, speed = 1, clockwise = True)
+#            Turn(30, speed = 1, clockwise = False)
+#            Turn(30, speed = 1, clockwise = True)
+#            state.set_override('NONE')
 
         elif override == 'SPIN_LEFT':
             Turn(80, speed = 1, clockwise = False)
