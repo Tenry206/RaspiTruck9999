@@ -345,10 +345,8 @@ def thread_motor():
             Turn(30, speed = 1, clockwise = True)
             Turn(30, speed = 1, clockwise = False)
             Turn(30, speed = 1, clockwise = True)
-            Turn(30, speed = 1, clockwise = True)
-            Turn(30, speed = 1, clockwise = False)
-            Turn(30, speed = 1, clockwise = True)
             state.set_override('NONE')
+
         elif override == 'SPIN_LEFT':
             Turn(80, speed = 1, clockwise = False)
             print('left')
@@ -374,7 +372,7 @@ print("Initializing System ...")
 
 cam = Camera(resolution=(640,480), fps=60)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=1500, fastThreshold=20, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=2200, fastThreshold=18, nlevels=12, scaleFactor=1.2, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)
