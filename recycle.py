@@ -19,15 +19,26 @@ if not hasattr(state, 'current_shape'):
 # ------ Templates ------
 
 
-templates = {
-    'button': cv2.imread('symbols/button.png', 0),
-    'fingerprint': cv2.imread('symbols/fingerprint.png', 0),
-    'qr': cv2.imread('symbols/qr.png', 0),
-    'recycle': cv2.imread('symbols/recycle.png', 0),
-    'recycle2': cv2.imread('symbols/recycle(1).png'),
-    'recycle3': cv2.imread('symbols/recycle(1)(1).png'),
-    'warning': cv2.imread('symbols/warning.png', 0)
+template_groups = {
+    'button': ['symbols/button.png'],
+    'fingerprint': ['symbols/fingerprint.png'],
+    'qr': ['symbols/qr.png'],
+    'recycle': ['symbols/recycle.png', 'symbols/recycle(1).png', 'symbols/recycle(1)(1).png'],
+    'warning': ['symbols/warning.png']
 }
+
+templates = {}
+template_alias = {}
+for label, paths in template_groups.items():
+    for i, path in enumerate(paths):
+        img = cv2.imread(path, 0)
+        if img is None:
+            continue
+
+        # Keep each variant unique for matching, then map back to one class label.
+        key = label if i == 0 else f"{label}__{i + 1}"
+        templates[key] = img
+        template_alias[key] = label
 
 
 # ------ Motor A GPIO setup ------
@@ -295,15 +306,17 @@ def thread_vision():
                 orb_start_time = time()
 
                 symbol = symbol_detect(frame_gray, templatesF, orb, matcher)
+                symbol = template_alias.get(symbol, symbol)
 
                 orb_delay = (time() - orb_start_time) *1000
                 #print(f"WARNING: ORB Stalled motor for {orb_delay:.1f} ms!")
 
                 if symbol !=None:
                     if symbol == 'fingerprint' or symbol == 'qr':
+                        state.set_override('FACE_SCAN')
                         print(symbol)
 
-                    elif symbol == 'recycle' or symbol == 'recycle2' or symbol == 'recycle3':
+                    elif symbol == 'recycle':
                         state.set_override('spongebob')
                     
                     elif symbol == 'warning' or symbol == 'button':
