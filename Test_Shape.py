@@ -41,11 +41,11 @@ def detect_shape(cnt):
     if verts in [9, 10] and (14000 < A < 28000) and (1.10 < ar < 1.45):
         return 'button', ar, A, P, C, verts
 
-    if verts == 12 and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.15 < C < 0.30):
+    if verts in [8,10,12] and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.17 < C < 0.30):
         return 'fingerprint', ar, A, P, C, verts
         
     # Part B (The Bottom Arch): 6 corners, Area ~2300, AR ~1.87, Circ ~0.15
-    if verts == 6 and (1500 < A < 3500) and (1.60 < ar < 2.20) and (0.10 < C < 0.25):
+    if verts == 6 and (1500 < A < 3500) and (1.38 < ar < 2.20) and (0.10 < C < 0.25):
         return 'fingerprint', ar, A, P, C, verts
     
     if verts == 4 :
