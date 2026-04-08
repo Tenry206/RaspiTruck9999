@@ -2,14 +2,14 @@ import cv2
 import numpy as np
 from Camera import Camera
 import math
-
+'''
 color_ranges = {
     'Green':  [(30, 80, 105), (60, 130, 125)],
     'Blue':   [(10, 235, 180), (20, 255, 200)],
     'Orange': [(100, 165, 170), (120, 180, 200)],
     'Red':    [(105, 110, 120), (130, 160, 180)]
 }
-
+'''
 def detect_shape(cnt):
     A = cv2.contourArea(cnt)
     if A <500:
@@ -35,10 +35,10 @@ def detect_shape(cnt):
             return 'Trapezium', ar, A, P, C, verts
         elif 10000<A<18500 and 0.68<C<0.8:
             return 'Diamond' ,ar, A, P, C, verts   
-    elif verts == 6 and 10000<A <12000 and 0.74<C<0.8:
-        if 0.76<C<0.9 :
+    elif verts == 6 :
+        if 0.76<C<0.9 and 9000<A <12000 :
             return 'Semicircle', ar, A, P, C, verts
-        elif 0.2<C<0.26:
+        elif 0.9<ar<1.2 and 4000<A<6000:
             return 'Arrow', ar,A, P, C, verts
     elif verts == 7:
         if 0.2<C<0.26:
@@ -59,7 +59,7 @@ def detect_shape(cnt):
             return 'Star' ,ar, A, P, C, verts
         elif 0.9<ar<1.2 and A>10000:
             return 'recycle', ar, A, P, C, verts
-    elif verts == 11  and 0.9<ar<1.2 and A >10000:
+    elif verts == 11  and 0.9<ar<1.2 and A >9000:
         return 'recycle', ar, A, P, C, verts
     elif verts == 12 and 0.5<C<0.7:
         return 'Cross' ,ar, A, P, C, verts
@@ -97,7 +97,7 @@ def process_shapes(frame):
     
     # 1. Adaptive Thresholding: Perfect for finding thin lines on varying backgrounds!
     # It compares a pixel to its neighbors (21x21 block), pulling out the thin box.
-    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 21, 5)
+    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
     
     # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
     line_kernel = np.ones((12, 12), np.uint8)
@@ -125,7 +125,7 @@ def process_shapes(frame):
             area = cv2.contourArea(c)
             
             # Look for a medium-to-large square (the black bounding box)
-            if 20000 < area < 39000: 
+            if 20000 < area < 45000: 
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
@@ -196,7 +196,7 @@ def process_shapes(frame):
     for cnt in contours:
         shape_label, ar, area, perim, circ, verts = detect_shape(cnt)
         direction = "None"
-        detected_color = "Unknown"
+        #detected_color = "Unknown"
 
         h_avg, s_avg, v_avg = 0, 0, 0
         
@@ -209,7 +209,7 @@ def process_shapes(frame):
             s_avg = int(mean_val[1])
             v_avg = int(mean_val[2])
             
-            
+            '''
             for color_name, (lower, upper) in color_ranges.items():
                 if lower[0] <= h_avg <= upper[0]:
                     detected_color = color_name
@@ -217,7 +217,7 @@ def process_shapes(frame):
             
             if shape_label == "Arrow" and detected_color == "Unknown":
                 shape_label = 'Noise'
-
+            '''
             if shape_label == "Arrow":
                 M = cv2.moments(cnt)
                 if M['m00'] != 0:
@@ -242,7 +242,7 @@ def process_shapes(frame):
         if shape_label != 'Noise' or (shape_label == 'Noise' and area > 1000):
             results.append({
                 'label': shape_label,
-                'color': detected_color,
+                'color': None,#detected_color
                 'direction': direction,
                 'contour': cnt,
                 'area': area,
