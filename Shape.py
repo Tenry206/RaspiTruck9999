@@ -100,7 +100,7 @@ def process_shapes(frame):
     thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 21, 5)
     
     # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
-    line_kernel = np.ones((15, 15), np.uint8)
+    line_kernel = np.ones((12, 12), np.uint8)
     thin_line_mask = cv2.morphologyEx(thin_line_mask, cv2.MORPH_CLOSE, line_kernel)
 
     # --- NEW: TEMPORARY DEBUG WINDOWS ---

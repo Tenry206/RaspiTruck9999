@@ -293,13 +293,16 @@ def thread_vision():
                 break  
 
             elif shape['label'] == 'recycle':
+                print("Recycle detected")
                 state.set_override('spongebob')
 
             elif shape['label'] != 'Noise':
-                #print(f"Detected Shape: {shape['label']}")
+                print(f"Detected Shape: {shape['label']}")
                 #state.set_override('FACE_SCAN')
                 state.set_override('STOP')
-                print(f"Shape detected: {shape['label']}")
+                sleep(1)
+                state.set_override(None)
+                #print(f"Shape detected: {shape['label']}")
                 break
 
             elif shape['label'] == 'Noise':
@@ -325,10 +328,12 @@ def thread_vision():
                 print(f"Detected Symbol: {symbol}")
                 if symbol !=None:
                     if symbol == 'fingerprint' or symbol == 'qr':
-                        #state.set_override('FACE_SCAN')
-                        #while state.get_override == 'FACE_SCAN' and state.running:
-                            #sleep(0.1)
-                        state.set_override("squidward")
+                        state.set_override('FACE_SCAN')
+                        while state.get_override == 'FACE_SCAN' and state.running:
+                            state.set_override('STOP')
+                            sleep(1)
+                            state.set_override(None)
+                        #state.set_override("squidward")
                         print(symbol)
                     
                     elif symbol == 'warning' or symbol == 'button':
@@ -352,7 +357,7 @@ def thread_motor():
 
         elif override == 'spongebob':
             stop()
-            Turn(480, speed = 1, clockwise = True) 
+            Turn(450, speed = 1, clockwise = True) 
             state.set_override('NONE')
 
         elif override == 'squidward':
@@ -386,7 +391,9 @@ print("Initializing System ...")
 
 cam = Camera(resolution=(640,480), fps=60)
 coloredLine = toilet()
-orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.15, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+#(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+orb = cv2.ORB_create(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
+#orb = cv2.ORB_create(nfeatures=2200, fastThreshold=15, nlevels=12, scaleFactor=1.15, patchSize=31) #(nfeatures=1800, fastThreshold=14, nlevels=12, scaleFactor=1.2, patchSize=31)
 
 matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
 templatesF = build_templatesF(templates, orb)

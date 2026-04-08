@@ -20,6 +20,14 @@ class Camera:
         #create object for Picamera2
         self.picam2 = Picamera2()
 
+        # --- NEw: Hardware tuning for motion blu ---
+        print("Aplying High-Speed Shutter Config")
+        self.picam2.set_controls({
+            "ExposureTime": 5000, # microseconds
+            "AnalogueGain": 25.0,
+            "AeEnable": False,
+        })
+
         #Configuration
         #main = image output in 640*480 resolution, in RGB fromat
         #controls = sensor timing of 16666 leads to 60fps
