@@ -57,9 +57,9 @@ def detect_shape(cnt):
     elif verts == 10:
         if 0.25<C<0.30 and A<8000:
             return 'Star' ,ar, A, P, C, verts
-        elif 0.9<ar<1.2:
+        elif 0.9<ar<1.2 and A>10000:
             return 'recycle', ar, A, P, C, verts
-    elif verts == 11  and 0.9<ar<1.2:
+    elif verts == 11  and 0.9<ar<1.2 and A >10000:
         return 'recycle', ar, A, P, C, verts
     elif verts == 12 and 0.5<C<0.7:
         return 'Cross' ,ar, A, P, C, verts
