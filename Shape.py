@@ -47,7 +47,7 @@ def detect_shape(cnt):
             return '3/4 Circle', ar, A, P, C, verts
         elif 0.76<C<0.9:
             return 'Semicircle',ar, A, P, C, verts
-        elif A>10000:
+        elif 8000<A<13500 and ar<1.09:
             return 'recycle', ar, A, P, C, verts
     elif verts == 8 :
         if 0.8<C<1.0:
@@ -56,14 +56,16 @@ def detect_shape(cnt):
             return '3/4 Circle', ar, A, P, C, verts
         elif 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
-        elif A>10000:
+        elif 8000<A<13500:
             return 'recycle', ar, A, P, C, verts
+    elif verts == 9 and 8000<A<13500:
+        return 'recycle', ar, A, P, C, verts
     elif verts == 10:
         if 0.25<C<0.30 and A<8000:
             return 'Star' ,ar, A, P, C, verts
-        elif 0.9<ar<1.2 and A>10000:
+        elif 0.9<ar<1.2 and 8000<A<13900:
             return 'recycle', ar, A, P, C, verts
-    elif verts == 11  and 0.9<ar<1.2 and A >9000:
+    elif verts == 11  and 0.9<ar<1.2 and 8000<A<13900:
         return 'recycle', ar, A, P, C, verts
     elif verts == 12 and 0.5<C<0.7:
         return 'Cross' ,ar, A, P, C, verts
@@ -104,7 +106,7 @@ def process_shapes(frame):
     thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
     
     # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
-    line_kernel = np.ones((12, 12), np.uint8)
+    line_kernel = np.ones((11, 11), np.uint8)
     thin_line_mask = cv2.morphologyEx(thin_line_mask, cv2.MORPH_CLOSE, line_kernel)
 
     # --- NEW: TEMPORARY DEBUG WINDOWS ---
