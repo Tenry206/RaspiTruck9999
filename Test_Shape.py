@@ -30,7 +30,7 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
     
-    if verts in [4,5,6] and (20000 < A < 35000) and (0.95 < ar < 1.25):
+    if verts in [4,5,6] and (20000 < A < 36000) and (0.95 < ar < 1.25):
         return 'warning', ar, A, P, C, verts
         
     # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
@@ -38,10 +38,16 @@ def detect_shape(cnt):
         return 'qr', ar, A, P, C, verts
         
     # 3. BUTTON (Target: 9-10 corners, Area ~17k-24k, AR ~1.19-1.33)
-    if verts in [9, 10] and (14000 < A < 28000) and (1.10 < ar < 1.45):
+    if verts in [8, 9, 10] and (14000 < A < 28000) and (1.10 < ar < 1.45):
         return 'button', ar, A, P, C, verts
-
-    if verts in [8,10,12] and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.17 < C < 0.30):
+    
+    if verts in [5, 6] and (12000 < A < 13500) and (0.5 < ar < 0.90):
+        return 'button', ar, A, P, C, verts
+    
+    if verts in [6, 7] and (8000 < A < 11000) and (0.5 < ar < 0.1):
+        return 'button', ar, A, P, C, verts
+    
+    if verts in [5,8,10,12] and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.17 < C < 0.30):
         return 'fingerprint', ar, A, P, C, verts
         
     # Part B (The Bottom Arch): 6 corners, Area ~2300, AR ~1.87, Circ ~0.15
@@ -79,6 +85,8 @@ def detect_shape(cnt):
             return 'recycle', ar, A, P, C, verts
     elif verts == 9:
         if 8000<A<13500 and 0.12<C<0.18:
+            return 'recycle', ar, A, P, C, verts
+        elif 8000<A<13500 and 0.05<C<0.1:
             return 'recycle', ar, A, P, C, verts
         elif A<7000 and 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
