@@ -13,7 +13,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
-        31,
+        37,
         9
     )
     
