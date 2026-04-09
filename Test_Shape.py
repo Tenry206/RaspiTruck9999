@@ -125,7 +125,7 @@ def process_shapes(frame):
     
     # 1. Adaptive Thresholding: Perfect for finding thin lines on varying backgrounds!
     # It compares a pixel to its neighbors (21x21 block), pulling out the thin box.
-    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
+    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 61, 5)
     
     # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
     line_kernel = np.ones((11, 11), np.uint8)
