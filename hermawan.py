@@ -19,7 +19,7 @@ if not hasattr(state, 'current_shape'):
 # ------ Motor A GPIO setup ------
 
 
-ENA = pwm(17, frequency=400)
+ENA = pwm(17, frequency=600)
 IN1 = OutputDevice(22)
 IN2 = OutputDevice(27)
 
@@ -27,7 +27,7 @@ IN2 = OutputDevice(27)
 # ------ Motor B GPIO setup ------
 
 
-ENB = pwm(13, frequency=400)
+ENB = pwm(13, frequency=600)
 IN3 = OutputDevice(5)
 IN4 = OutputDevice(6)
     
