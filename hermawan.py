@@ -303,7 +303,7 @@ def thread_vision():
             elif shape['label'] == 'warning' or shape['label'] == 'button' or shape['label'] != 'Noise':
                 print(shape['label'])
                 state.set_override('STOP')
-                symbol_cooldown = 100
+                symbol_cooldown = 150
         # 10 FPS
         sleep(0.01)
 
