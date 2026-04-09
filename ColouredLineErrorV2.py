@@ -12,7 +12,7 @@ class toilet:
         self.upper_yellow = np.array([120, 255, 255])
         
         self.lower_red = np.array([100, 100, 100])
-        self.upper_red = np.array([120, 255, 255]) 
+        self.upper_red = np.array([140, 255, 255]) 
 
         self.colorThresh = 150 
         self.error_queue = deque(maxlen=3) 
