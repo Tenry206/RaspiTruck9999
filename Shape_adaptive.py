@@ -14,7 +14,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
         31,
-        12
+        9
     )
     
     adaptive_color = cv2.adaptiveThreshold(
@@ -23,7 +23,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY,
         31,
-        -2
+        -1
     )
 
     candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
