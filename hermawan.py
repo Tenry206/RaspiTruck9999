@@ -19,7 +19,7 @@ if not hasattr(state, 'current_shape'):
 # ------ Motor A GPIO setup ------
 
 
-ENA = pwm(17)
+ENA = pwm(17, frequency=400)
 IN1 = OutputDevice(22)
 IN2 = OutputDevice(27)
 
@@ -27,7 +27,7 @@ IN2 = OutputDevice(27)
 # ------ Motor B GPIO setup ------
 
 
-ENB = pwm(13)
+ENB = pwm(13, frequency=400)
 IN3 = OutputDevice(5)
 IN4 = OutputDevice(6)
     
@@ -41,11 +41,11 @@ def set_motor(motor_pwm, in1, in2, speed):
     speed = max(min(speed, 1), -1) 
 
     # 0.4 PWM Deadzone 
-    if 0 < speed < 0.23:
-        adjusted_speed = 0.23
+    if 0 < speed < 0.20:
+        adjusted_speed = 0.20
 
-    elif -0.23 < speed < 0:
-        adjusted_speed = -0.23
+    elif -0.20 < speed < 0:
+        adjusted_speed = -0.20
 
     else:
         adjusted_speed = speed
@@ -154,7 +154,7 @@ def thread_line_follow():
     Ki = 0
     Kd = 0.36
 
-    base_speed = 0.23 #0.7
+    base_speed = 0.20 #0.7
     last_error = 0
     integral = 0
     dt = 0.02
