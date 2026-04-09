@@ -267,6 +267,8 @@ def process_shapes(frame):
                 'direction': direction,
                 'contour': cnt,
                 'area': area,
+                'circ': circ,   
+                'verts': verts,
                 'hsv': (0, 0, 0)
                 #'hsv': (h_avg, s_avg, v_avg)
             })
@@ -293,19 +295,26 @@ def main():
                 direction = shape['direction']
                 area = shape['area']
                 h, s, v = shape['hsv']
-                
+
+                # --- NEW: Extract C and Verts from the dictionary! ---
+                C = shape['circ']
+                verts = shape['verts']
+
                 #--- temporary test
                 # 1. Recalculate corners and AR for our debug print
                 eps = 0.03 * cv2.arcLength(cnt, True)
                 approx = cv2.approxPolyDP(cnt, eps, True)
-                verts = len(approx)
                 
-                _, _, bw, bh = cv2.boundingRect(approx)
+                
+                bx, by, bw, bh = cv2.boundingRect(approx)
                 ar = bw / float(bh) if bh > 0 else 0
                 
                 # 2. Draw the outline (RED if unrecognized Noise, GREEN if successful Shape)
                 outline_color = (0, 0, 255) if label == 'Noise' else (0, 255, 0)
                 cv2.drawContours(frame, [approx], 0, outline_color, 3)
+                
+                # Draw a purple rectangle around the shape!
+                cv2.rectangle(frame, (bx, by), (bx + bw, by + bh), (255, 0, 255), 2)
                 
                 # 3. Print stats DIRECTLY onto the camera window!
                 M = cv2.moments(cnt)
@@ -314,12 +323,13 @@ def main():
                     cy = int(M['m01']/M['m00'])
                     
                     # Draw Text: Area, Corners (Verts), and AR hovering over the shape
-                    cv2.putText(frame, f"Area: {area:.0f}", (cx - 50, cy - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                    cv2.putText(frame, f"Corn: {verts}", (cx - 50, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                    cv2.putText(frame, f"AR: {ar:.2f}", (cx - 50, cy + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                    cv2.putText(frame, f"Hue: {h}", (cx - 50, cy + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                    cv2.putText(frame, f"{label}", (cx - 50, cy + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-
+                    cv2.putText(frame, f"Area: {area:.0f}", (cx - 50, cy - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"Corn: {verts}", (cx - 50, cy - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"AR: {ar:.2f}", (cx - 50, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"Circ: {C:.2f}", (cx - 50, cy + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"{label}", (cx - 50, cy + 45), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+            
+            print(f"TUNING -> {label}: Area={area:.0f}, Corners={verts}, AR={ar:.2f}, Circ={C:.2f}")
             contour_debug = frame.copy()
             all_contours, _ = cv2.findContours(thresh_mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cv2.drawContours(contour_debug, all_contours, -1, (255, 0, 0), 2)
