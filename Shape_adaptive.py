@@ -8,15 +8,7 @@ SHAPE_AREA_RANGE = (2500, 33000)
 
 def build_shape_candidate_mask(blur_gray, blur_sat):
     """Return a loose adaptive mask; final classification is handled later."""
-    adaptive_dark_mid = cv2.adaptiveThreshold(
-        blur_gray,
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV,
-        31,
-        6
-    )
-    adaptive_dark_large = cv2.adaptiveThreshold(
+    adaptive_dark = cv2.adaptiveThreshold(
         blur_gray,
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -33,8 +25,6 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         -3
     )
 
-    # Combining two scales helps keep thin fingerprint arcs while still handling uneven lighting.
-    adaptive_dark = cv2.bitwise_or(adaptive_dark_mid, adaptive_dark_large)
     candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
 
     # Keep this stage gentle so we do not distort clean shapes before detect_shape().
