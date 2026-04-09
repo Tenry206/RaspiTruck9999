@@ -4,7 +4,7 @@ from Camera import Camera
 import math
 
 
-SHAPE_AREA_RANGE = (2500, 33000)
+SHAPE_AREA_RANGE = (2500, 36000)
 
 def build_shape_candidate_mask(blur_gray, blur_sat):
     """Return a loose adaptive mask; final classification is handled later."""
@@ -13,8 +13,8 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
-        61,
-        6
+        31,
+        7
     )
     adaptive_color = cv2.adaptiveThreshold(
         blur_sat,
@@ -27,11 +27,11 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
 
     candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
 
-    # Keep this stage gentle so we do not distort clean shapes before detect_shape().
-    close_kernel = np.ones((5, 5), np.uint8)
-    open_kernel = np.ones((2, 2), np.uint8)
-    candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_CLOSE, close_kernel)
+    # Opening first helps suppress thin line noise before reconnecting shape regions.
+    open_kernel = np.ones((3, 3), np.uint8)
+    close_kernel = np.ones((7, 7), np.uint8)
     candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_OPEN, open_kernel)
+    candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_CLOSE, close_kernel)
 
     contours, _ = cv2.findContours(candidate_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     filtered_mask = np.zeros_like(blur_gray)
@@ -42,8 +42,16 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         if not (min_area <= area <= max_area):
             continue
 
-        x, y, w, h = cv2.boundingRect(cnt)
-        if w < 20 or h < 20:
+        _, _, w, h = cv2.boundingRect(cnt)
+        if w < 35 or h < 35:
+            continue
+
+        bbox_area = w * h
+        if bbox_area == 0:
+            continue
+
+        extent = area / float(bbox_area)
+        if extent < 0.25:
             continue
 
         cv2.drawContours(filtered_mask, [cnt], -1, 255, -1)
@@ -163,7 +171,6 @@ def process_shapes(frame):
         return [], np.zeros_like(blurred)
     '''
     _, mask_color = cv2.threshold(blur_sat, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    _, mask_dark = cv2.threshold(blur_gray, 150, 255, cv2.THRESH_BINARY_INV)
     '''
     #roi
     thresh[:, :120] = 0  
@@ -172,8 +179,7 @@ def process_shapes(frame):
     thresh[:50, :] = 0   
     '''
     adaptive_candidates = build_shape_candidate_mask(blur_gray, blur_sat)
-    base_mask = cv2.bitwise_or(mask_color, mask_dark)
-    thresh = cv2.bitwise_and(base_mask, adaptive_candidates)
+    thresh = cv2.bitwise_and(mask_color, adaptive_candidates)
 
     # 5. Shape Glue
     kernel = np.ones((5, 5), np.uint8)
