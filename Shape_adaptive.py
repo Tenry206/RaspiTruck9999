@@ -7,43 +7,6 @@ import math
 SHAPE_AREA_RANGE = (2500, 33000)
 
 
-def is_shape_candidate(cnt):
-    """Broad filter so broken contours can survive until final shape classification."""
-    area = cv2.contourArea(cnt)
-    if area < SHAPE_AREA_RANGE[0] or area > SHAPE_AREA_RANGE[1]:
-        return False
-
-    peri = cv2.arcLength(cnt, True)
-    if peri == 0:
-        return False
-
-    approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)
-    verts = len(approx)
-    if verts < 4 or verts > 14:
-        return False
-
-    _, _, w, h = cv2.boundingRect(cnt)
-    if w < 35 or h < 35:
-        return False
-
-    bbox_area = w * h
-    if bbox_area == 0:
-        return False
-
-    extent = area / float(bbox_area)
-    circularity = 4 * np.pi * area / (peri ** 2)
-    ar = w / float(h)
-
-    if extent < 0.18:
-        return False
-    if circularity < 0.12:
-        return False
-    if not (0.45 <= ar <= 1.8):
-        return False
-
-    return True
-
-
 def build_shape_candidate_mask(blur_gray, blur_sat):
     """Return a mask of blobs whose geometry looks close to our known shapes."""
     adaptive_dark = cv2.adaptiveThreshold(
@@ -80,7 +43,20 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         if not (min_area <= area <= max_area):
             continue
 
-        if not is_shape_candidate(cnt):
+        x, y, w, h = cv2.boundingRect(cnt)
+        if w < 35 or h < 35:
+            continue
+
+        bbox_area = w * h
+        if bbox_area == 0:
+            continue
+
+        extent = area / float(bbox_area)
+        if extent < 0.25:
+            continue
+
+        label, _, _, _, _, _ = detect_shape(cnt)
+        if label == 'Noise':
             continue
 
         cv2.drawContours(filtered_mask, [cnt], -1, 255, -1)
@@ -315,7 +291,6 @@ def main():
             # 4. Find contours
             #contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            original_frame = frame.copy()
             detected_shapes, thresh_mask = process_shapes(frame)
             '''
             for shape in detected_shapes:
@@ -393,12 +368,8 @@ amsk
                 # Print to terminal as well
                 print(f"TUNING -> {label}: Area={area:.0f}, Corners={verts}, AR={ar:.2f}, Hue={h}")
                 
-            # 4. Show the raw frame beside the contour overlay for tuning
-            raw_view = cv2.resize(original_frame, (640, 480))
-            contour_view = cv2.resize(frame, (640, 480))
-            debug_view = np.hstack((raw_view, contour_view))
-            cv2.imshow("Shape Debug: Original | Contours", debug_view)
-            cv2.imshow("Shape Threshold Mask", thresh_mask)
+            # 4. Show the temporary tuning window
+            cv2.imshow("Shape Tuning Window", frame)
             '''
                 # Only draw and print if it's a real shape
                 if label != 'Noise':
