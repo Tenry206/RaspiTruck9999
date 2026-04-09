@@ -337,7 +337,7 @@ def main():
             raw_view = cv2.resize(original_frame, (640, 480))
             contour_view = cv2.resize(frame, (640, 480))
             debug_view = np.hstack((raw_view, contour_view))
-            cv2.imshow("Shape Debug: Original | Contours", debug_view)
+            
             cv2.imshow("Shape Drawn Contours", contour_debug)
             cv2.imshow("Shape Threshold Mask", thresh_mask)
 
