@@ -304,6 +304,9 @@ def thread_vision():
                 print(shape['label'])
                 state.set_override('FACE_SCAN')
 
+            elif shape['label'] != 'Noise':
+                print(shape['label'])
+                state.set_override('STOP')
         # 10 FPS
         sleep(0.01)
 
