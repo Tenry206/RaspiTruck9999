@@ -203,7 +203,7 @@ def process_shapes(frame):
     
     
 
-    MAX_DISTANCE = 150
+    MAX_DISTANCE = 100
     centers = []
 
     for cnt in initial_contours:
