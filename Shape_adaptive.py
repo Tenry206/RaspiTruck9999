@@ -96,7 +96,7 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
 
-    if verts in [4,5,6] and (20000 < A < 36000) and (0.95 < ar < 1.25):
+    if verts in [4,5,6] and (20000 < A < 38000) and (0.95 < ar < 1.25):
         return 'warning', ar, A, P, C, verts
         
     # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
