@@ -51,8 +51,8 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
-        31,
-        7
+        121,
+        16
     )
     adaptive_color = cv2.adaptiveThreshold(
         blur_sat,
