@@ -41,11 +41,11 @@ def set_motor(motor_pwm, in1, in2, speed):
     speed = max(min(speed, 1), -1) 
 
     # 0.4 PWM Deadzone 
-    if 0 < speed < 0.21:
-        adjusted_speed = 0.21
+    if 0 < speed < 0.22:
+        adjusted_speed = 0.22
 
-    elif -0.21 < speed < 0:
-        adjusted_speed = -0.21
+    elif -0.22 < speed < 0:
+        adjusted_speed = -0.22
 
     else:
         adjusted_speed = speed
@@ -154,7 +154,7 @@ def thread_line_follow():
     Ki = 0
     Kd = 0.36
 
-    base_speed = 0.21 #0.7
+    base_speed = 0.22 #0.7
     last_error = 0
     integral = 0
     dt = 0.02
