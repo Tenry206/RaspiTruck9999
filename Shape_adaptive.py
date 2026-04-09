@@ -6,86 +6,8 @@ import math
 
 SHAPE_AREA_RANGE = (2500, 33000)
 
-
-def is_shape_candidate(cnt):
-    """Broad filter so broken contours can survive until final shape classification."""
-    area = cv2.contourArea(cnt)
-    if area < SHAPE_AREA_RANGE[0] or area > SHAPE_AREA_RANGE[1]:
-        return False
-
-    peri = cv2.arcLength(cnt, True)
-    if peri == 0:
-        return False
-
-    approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)
-    verts = len(approx)
-    if verts < 4 or verts > 14:
-        return False
-
-    _, _, w, h = cv2.boundingRect(cnt)
-    if w < 35 or h < 35:
-        return False
-
-    bbox_area = w * h
-    if bbox_area == 0:
-        return False
-
-    extent = area / float(bbox_area)
-    circularity = 4 * np.pi * area / (peri ** 2)
-    ar = w / float(h)
-
-    if extent < 0.18:
-        return False
-    if circularity < 0.12:
-        return False
-    if not (0.45 <= ar <= 1.8):
-        return False
-
-    return True
-
-
-def contour_stats(cnt):
-    area = cv2.contourArea(cnt)
-    peri = cv2.arcLength(cnt, True)
-    if peri == 0:
-        return area, 0.0, 0.0, 0.0, 0
-
-    approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)
-    _, _, w, h = cv2.boundingRect(cnt)
-    bbox_area = w * h
-    extent = area / float(bbox_area) if bbox_area > 0 else 0.0
-    circularity = 4 * np.pi * area / (peri ** 2)
-    ar = w / float(h) if h > 0 else 0.0
-    return area, circularity, ar, extent, len(approx)
-
-
-def repair_symbol_mask(mask):
-    """Reconnect fragmented curved symbols while suppressing thin line grains."""
-    repaired = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
-    repaired = cv2.dilate(repaired, np.ones((3, 3), np.uint8), iterations=1)
-
-    contours, _ = cv2.findContours(repaired, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cleaned = np.zeros_like(mask)
-
-    for cnt in contours:
-        area, circularity, ar, extent, verts = contour_stats(cnt)
-        if area < 1200:
-            continue
-        if extent < 0.08:
-            continue
-        if circularity < 0.06:
-            continue
-        if h := cv2.boundingRect(cnt)[3]:
-            w = cv2.boundingRect(cnt)[2]
-            if min(w, h) < 25:
-                continue
-        cv2.drawContours(cleaned, [cnt], -1, 255, -1)
-
-    return cleaned
-
-
 def build_shape_candidate_mask(blur_gray, blur_sat):
-    """Return a mask of blobs whose geometry looks close to our known shapes."""
+    """Return a loose adaptive mask; final classification is handled later."""
     adaptive_dark_mid = cv2.adaptiveThreshold(
         blur_gray,
         255,
@@ -115,12 +37,11 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
     adaptive_dark = cv2.bitwise_or(adaptive_dark_mid, adaptive_dark_large)
     candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
 
-    # Close first to reconnect symbol fragments, then open lightly to knock out black-line grains.
+    # Keep this stage gentle so we do not distort clean shapes before detect_shape().
     close_kernel = np.ones((5, 5), np.uint8)
-    open_kernel = np.ones((3, 3), np.uint8)
+    open_kernel = np.ones((2, 2), np.uint8)
     candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_CLOSE, close_kernel)
     candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_OPEN, open_kernel)
-    candidate_mask = repair_symbol_mask(candidate_mask)
 
     contours, _ = cv2.findContours(candidate_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     filtered_mask = np.zeros_like(blur_gray)
@@ -131,23 +52,11 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         if not (min_area <= area <= max_area):
             continue
 
-        if not is_shape_candidate(cnt):
+        x, y, w, h = cv2.boundingRect(cnt)
+        if w < 20 or h < 20:
             continue
 
-        area, circularity, ar, extent, verts = contour_stats(cnt)
-        is_recycle_like = (
-            7000 < area < 16000 and
-            0.75 < ar < 1.25 and
-            0.08 < circularity < 0.22 and
-            7 <= verts <= 11
-        )
-        is_fingerprint_like = (
-            (7000 < area < 14000 and 0.85 < ar < 1.25 and 0.15 < circularity < 0.34 and verts in [8, 9, 10, 11, 12]) or
-            (1500 < area < 4500 and 1.30 < ar < 2.30 and 0.08 < circularity < 0.28 and 5 <= verts <= 8)
-        )
-
-        if is_recycle_like or is_fingerprint_like or is_shape_candidate(cnt):
-            cv2.drawContours(filtered_mask, [cnt], -1, 255, -1)
+        cv2.drawContours(filtered_mask, [cnt], -1, 255, -1)
 
     return filtered_mask
 
@@ -247,6 +156,7 @@ def process_shapes(frame):
         return [], np.zeros_like(blurred)
     '''
     _, mask_color = cv2.threshold(blur_sat, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, mask_dark = cv2.threshold(blur_gray, 150, 255, cv2.THRESH_BINARY_INV)
     '''
     #roi
     thresh[:, :120] = 0  
@@ -255,7 +165,8 @@ def process_shapes(frame):
     thresh[:50, :] = 0   
     '''
     adaptive_candidates = build_shape_candidate_mask(blur_gray, blur_sat)
-    thresh = cv2.bitwise_and(mask_color, adaptive_candidates)
+    base_mask = cv2.bitwise_or(mask_color, mask_dark)
+    thresh = cv2.bitwise_and(base_mask, adaptive_candidates)
 
     # 5. Shape Glue
     kernel = np.ones((5, 5), np.uint8)
