@@ -51,8 +51,8 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
-        121,
-        16
+        15,
+        6
     )
     adaptive_color = cv2.adaptiveThreshold(
         blur_sat,
@@ -196,7 +196,6 @@ def process_shapes(frame):
     # 5. Shape Glue
     kernel = np.ones((5, 5), np.uint8)
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     # Re-include your Centroid Linking logic here if needed for QR codes
 
     initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
