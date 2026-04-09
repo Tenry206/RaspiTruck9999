@@ -250,7 +250,7 @@ def thread_line_follow():
         state.set_steering(left_speed, right_speed)
 
         # 50 FPS Limit
-        sleep(0.05)
+        sleep(0.02)
 
 def thread_vision():
 
