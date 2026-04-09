@@ -30,11 +30,11 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
     
-    if verts == 4 and (20000 < A < 35000) and (0.95 < ar < 1.25):
+    if verts in [4,5,6] and (20000 < A < 35000) and (0.95 < ar < 1.25):
         return 'warning', ar, A, P, C, verts
         
     # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
-    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.20) and (0.27 <C<0.33):
+    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
         return 'qr', ar, A, P, C, verts
         
     # 3. BUTTON (Target: 9-10 corners, Area ~17k-24k, AR ~1.19-1.33)
@@ -47,6 +47,7 @@ def detect_shape(cnt):
     # Part B (The Bottom Arch): 6 corners, Area ~2300, AR ~1.87, Circ ~0.15
     if verts == 6 and (1500 < A < 3500) and (1.38 < ar < 2.20) and (0.10 < C < 0.25):
         return 'fingerprint', ar, A, P, C, verts
+
     
     if verts == 4 :
         if 10000< A<17000 and 0.67<C<0.70:
@@ -152,7 +153,7 @@ def process_shapes(frame):
             area = cv2.contourArea(c)
             
             # Look for a medium-to-large square (the black bounding box)
-            if 20000 < area < 45000: 
+            if 20000 < area < 47000: 
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
