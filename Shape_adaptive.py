@@ -29,7 +29,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
 
     # Opening first helps suppress thin line noise before reconnecting shape regions.
     open_kernel = np.ones((5, 5), np.uint8)
-    close_kernel = np.ones((7, 7), np.uint8)
+    close_kernel = np.ones((5, 5), np.uint8)
     candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_OPEN, open_kernel)
     candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_CLOSE, close_kernel)
 
