@@ -346,10 +346,6 @@ def main():
             contour_debug = frame.copy()
             all_contours, _ = cv2.findContours(thresh_mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cv2.drawContours(contour_debug, all_contours, -1, (255, 0, 0), 2)
-
-            raw_view = cv2.resize(original_frame, (640, 480))
-            contour_view = cv2.resize(frame, (640, 480))
-            debug_view = np.hstack((raw_view, contour_view))
             
             cv2.imshow("Shape Drawn Contours", contour_debug)
             cv2.imshow("Shape Threshold Mask", thresh_mask)
