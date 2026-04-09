@@ -297,16 +297,13 @@ def thread_vision():
                 print("Recycle detected")
                 state.set_override('spongebob')
 
-            elif shape['label'] == 'warning' or shape['label'] == 'button':
-                state.set_override('STOP')
-
             elif shape['label'] == 'qr' or shape['label'] == 'fingerprint':
                 print(shape['label'])
                 state.set_override('FACE_SCAN')
-
-            elif shape['label'] != 'Noise':
+            elif shape['label'] == 'warning' or shape['label'] == 'button' or shape['label'] != 'Noise':
                 print(shape['label'])
                 state.set_override('STOP')
+                symbol_cooldown = 50
         # 10 FPS
         sleep(0.01)
 
