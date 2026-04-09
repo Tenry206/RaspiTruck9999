@@ -51,6 +51,23 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
     return filtered_mask
 
 
+def is_line_like_contour(cnt):
+    """Reject long thin contours that are more likely to be track lines than symbols."""
+    (_, _), (w, h), _ = cv2.minAreaRect(cnt)
+    short_side = min(w, h)
+    long_side = max(w, h)
+
+    if short_side <= 0:
+        return True
+
+    rect_area = w * h
+    area = cv2.contourArea(cnt)
+    rect_fill = area / rect_area if rect_area > 0 else 0.0
+    elongation = long_side / short_side
+
+    return elongation > 4.5 and rect_fill < 0.65
+
+
 def detect_shape(cnt):
     A = cv2.contourArea(cnt)
     if A <500:
@@ -190,6 +207,9 @@ def process_shapes(frame):
 
     results = []
     for cnt in contours:
+        if is_line_like_contour(cnt):
+            continue
+
         shape_label, ar, area, perim, circ, verts = detect_shape(cnt)
         direction = "None"
         #detected_color = "Unknown"
@@ -234,8 +254,7 @@ def process_shapes(frame):
                         direction = 'Right' if dx>0 else "Left"
                     #else:direction = "Down" if dy > 0 else "Up"
 
-
-        if shape_label != 'Noise' or (shape_label == 'Noise' and area > 1000):
+        if shape_label != 'Noise':
             results.append({
                 'label': shape_label,
                 'color': None,#detected_color
