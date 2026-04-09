@@ -8,7 +8,7 @@ SHAPE_AREA_RANGE = (2500, 36000)
 
 def build_shape_candidate_mask(blur_gray, blur_sat):
     """Return a loose adaptive mask; final classification is handled later."""
-    candidate_mask = cv2.adaptiveThreshold(
+    adaptive_dark = cv2.adaptiveThreshold(
         blur_gray,
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -16,7 +16,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         31,
         12
     )
-    '''
+    
     adaptive_color = cv2.adaptiveThreshold(
         blur_sat,
         255,
@@ -24,9 +24,9 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         cv2.THRESH_BINARY,
         31,
         -3
-    )'''
+    )
 
-    #candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
+    candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
 
     # Opening first helps suppress thin line noise before reconnecting shape regions.
     open_kernel = np.ones((5, 5), np.uint8)
