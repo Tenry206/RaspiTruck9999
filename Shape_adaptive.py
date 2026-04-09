@@ -46,7 +46,15 @@ def is_shape_candidate(cnt):
 
 def build_shape_candidate_mask(blur_gray, blur_sat):
     """Return a mask of blobs whose geometry looks close to our known shapes."""
-    adaptive_dark = cv2.adaptiveThreshold(
+    adaptive_dark_mid = cv2.adaptiveThreshold(
+        blur_gray,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY_INV,
+        31,
+        6
+    )
+    adaptive_dark_large = cv2.adaptiveThreshold(
         blur_gray,
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -63,13 +71,15 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         -3
     )
 
+    # Combining two scales helps keep thin fingerprint arcs while still handling uneven lighting.
+    adaptive_dark = cv2.bitwise_or(adaptive_dark_mid, adaptive_dark_large)
     candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
 
-    # Opening first helps suppress the thin track line before contour filtering.
-    open_kernel = np.ones((3, 3), np.uint8)
-    close_kernel = np.ones((7, 7), np.uint8)
-    candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_OPEN, open_kernel)
+    # Close first to reconnect arc fragments, then open lightly to suppress thin track noise.
+    close_kernel = np.ones((5, 5), np.uint8)
+    open_kernel = np.ones((2, 2), np.uint8)
     candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_CLOSE, close_kernel)
+    candidate_mask = cv2.morphologyEx(candidate_mask, cv2.MORPH_OPEN, open_kernel)
 
     contours, _ = cv2.findContours(candidate_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     filtered_mask = np.zeros_like(blur_gray)
@@ -289,90 +299,12 @@ def main():
     
     try:
         while True:
-            # 2. Grab the full, uncropped frame
             frame = cam.read()
-            
-            # 3. Process the full frame for shapes
-            # Convert to HSV color space instead of Grayscale
-            #hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            
-            # Extract ONLY the Saturation channel (Index 1)
-            # Colorful things are white, grayscale things (background) become black
-            #saturation = hsv[:, :, 1]
-            #blurred = cv2.GaussianBlur(saturation, (5, 5), 0)           
-            
-            # NOTE: If your shapes are black on a white background, use THRESH_BINARY_INV
-            # If they are white/light on a dark background, use THRESH_BINARY
-            #_, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            if frame is None:
+                continue
 
-            
-            #initial_contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
-            #Distance between seperate shape
-            '''
-            MAX_DISTANCE = 100
-            centers = []
-
-            for cnt in initial_contours:
-                if cv2.contourArea(cnt) >300:
-                    M = cv2.moments(cnt)
-                    if M['m00']!= 0:
-                        cx = int(M['m10']/M['m00'])
-                        cy = int(M['m01']/M['m00'])
-                        centers.append((cx,cy))
-                        
-            for i in range(len(centers)):
-                for j in range(i+1, len(centers)):
-                    # Calculate straight-line distance between shape centers
-                    if math.hypot(centers[i][0]-centers[j][0], centers[i][1]-centers[j][1]) < MAX_DISTANCE:
-                        # Draw a thick white line to fuse the shapes
-                        cv2.line(thresh, centers[i], centers[j], 255, thickness=6)
-            '''
-            #cv2.imshow("Linked Threshold Mask", thresh)
-            
-            # 4. Find contours
-            #contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
             original_frame = frame.copy()
             detected_shapes, thresh_mask = process_shapes(frame)
-            '''
-            for shape in detected_shapes:
-                
-                shape_label, ar, A, P, C, verts = detect_shape(cnt)
-                
-                mask = np.zeros(saturation.shape, np.uint8)
-                cv2.drawContours(mask, [cnt], -1,255,-1)
-                mean_val = cv2.mean(hsv, mask=mask)
-                h_avg, s_avg, v_avg = int(mean_val[0]), int(mean_val[1]), int(mean_val[2])
-                
-                detected_color = "Unknown"
-                for color_name, (lower, upper) in color_ranges.items():
-                    if lower[0] <= h_avg <= upper[0]:
-                        detected_color = color_name
-                        break
-amsk
-                if shape_label != 'Noise':
-                    # Draw the bounding polygon
-                    eps = 0.03 * cv2.arcLength(cnt, True)
-                    approx = cv2.approxPolyDP(cnt, eps, True)
-                    cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)
-                
-                if shape_label == 'Arrow':
-                    if detected_color == 'Red':
-                        print("Down Arrow")
-                    elif detected_color == 'Green':
-                        print("Up Arrow")
-                    elif detected_color == 'Blue':
-                        print("Right Arrow")
-                    elif detected_color == 'Orange':
-                        print("Left Arrow")
-                    else:
-                        print("Noise")
-                else:
-                    print(f"{shape_label}: AR={ar:.2f}, Area={A:.0f}, Perim={P:.0f}, Circ={C:.2f}, Verts={verts:.2f}")
-            print(h_avg, s_avg, v_avg)
-            # 5. Display the live feed
-            '''
 
             for shape in detected_shapes:
                 cnt = shape['contour']
@@ -408,37 +340,17 @@ amsk
                     cv2.putText(frame, f"Hue: {h}", (cx - 50, cy + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                     cv2.putText(frame, f"{label}", (cx - 50, cy + 50), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
-                # Print to terminal as well
-                print(f"TUNING -> {label}: Area={area:.0f}, Corners={verts}, AR={ar:.2f}, Hue={h}")
-                
-            # 4. Show the raw frame beside the contour overlay for tuning
+            contour_debug = frame.copy()
+            all_contours, _ = cv2.findContours(thresh_mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cv2.drawContours(contour_debug, all_contours, -1, (255, 0, 0), 2)
+
             raw_view = cv2.resize(original_frame, (640, 480))
             contour_view = cv2.resize(frame, (640, 480))
             debug_view = np.hstack((raw_view, contour_view))
             cv2.imshow("Shape Debug: Original | Contours", debug_view)
+            cv2.imshow("Shape Drawn Contours", contour_debug)
             cv2.imshow("Shape Threshold Mask", thresh_mask)
-            '''
-                # Only draw and print if it's a real shape
-                if label != 'Noise':
-                    # Draw the green outline
-                    eps = 0.03 * cv2.arcLength(cnt, True)
-                    approx = cv2.approxPolyDP(cnt, eps, True)
-                    cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)
-                    
-                    # Print to terminal
-                    if label == 'Arrow':
-                        print(f"Detected {color} Arrow pointing {direction}")
-                        print(f"HSV: H={h} S={s} V={v}")
-                    else:
-                        P = cv2.arcLength(cnt, True)
-                        C = 4 * np.pi * area / (P**2) if P > 0 else 0
-                        verts = len(approx)
-                        print(f"{label}: Area={area:.0f}, Circ={C:.2f}, Verts={verts}")
-                        
-                
-            #cv2.imshow("Shape Detection", frame)
-            '''
-            # 6. Exit condition (Press 'q' to quit)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
                 
