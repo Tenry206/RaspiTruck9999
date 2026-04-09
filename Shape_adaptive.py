@@ -14,7 +14,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
         31,
-        11
+        13
     )
     adaptive_color = cv2.adaptiveThreshold(
         blur_sat,
@@ -96,33 +96,43 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
 
-    if verts in [4, 5, 6] and (20000 < A < 35000) and (0.95 < ar < 1.25):
+    if verts in [4,5,6] and (20000 < A < 36000) and (0.95 < ar < 1.25):
         return 'warning', ar, A, P, C, verts
-
-    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 < C < 0.33):
+        
+    # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
+    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
         return 'qr', ar, A, P, C, verts
-
-    if verts in [9, 10] and (14000 < A < 28000) and (1.10 < ar < 1.45):
+        
+    # 3. BUTTON (Target: 9-10 corners, Area ~17k-24k, AR ~1.19-1.33)
+    if verts in [8, 9, 10] and (14000 < A < 28000) and (1.10 < ar < 1.45):
         return 'button', ar, A, P, C, verts
-
-    if verts in [8, 10, 12] and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.17 < C < 0.30):
+    
+    if verts in [5, 6] and (12000 < A < 13500) and (0.5 < ar < 0.90):
+        return 'button', ar, A, P, C, verts
+    
+    if verts in [6, 7] and (8000 < A < 11000) and (0.5 < ar < 0.1):
+        return 'button', ar, A, P, C, verts
+    
+    if verts in [5,8,10,12] and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.17 < C < 0.30):
         return 'fingerprint', ar, A, P, C, verts
-
+        
+    # Part B (The Bottom Arch): 6 corners, Area ~2300, AR ~1.87, Circ ~0.15
     if verts == 6 and (1500 < A < 3500) and (1.38 < ar < 2.20) and (0.10 < C < 0.25):
         return 'fingerprint', ar, A, P, C, verts
 
+    
     if verts == 4 :
         if 10000< A<17000 and 0.67<C<0.70:
             return 'Trapezium', ar, A, P, C, verts
         elif 10000<A<18500 and 0.68<C<0.8:
-            return 'Diamond' ,ar, A, P, C, verts
+            return 'Diamond' ,ar, A, P, C, verts   
     elif verts == 6 :
         if 0.76<C<0.9 and 9000<A <12000 :
             return 'Semicircle', ar, A, P, C, verts
         elif 0.9<ar<1.2 and 4000<A<6000:
             return 'Arrow', ar,A, P, C, verts
     elif verts == 7:
-        if A < 7000 and 0.2<C<0.26:
+        if A<7000 and 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
         elif 0.5<C<0.8:
             return '3/4 Circle', ar, A, P, C, verts
@@ -135,14 +145,16 @@ def detect_shape(cnt):
             return 'Octagon' ,ar, A, P, C, verts
         elif 0.5<C<0.8:
             return '3/4 Circle', ar, A, P, C, verts
-        elif A < 7000 and 0.2<C<0.26:
+        elif A<7000 and 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
         elif 8000<A<13500 and 0.12<C<0.18:
             return 'recycle', ar, A, P, C, verts
     elif verts == 9:
         if 8000<A<13500 and 0.12<C<0.18:
             return 'recycle', ar, A, P, C, verts
-        elif A < 7000 and 0.2<C<0.26:
+        elif 8000<A<13500 and 0.05<C<0.1:
+            return 'recycle', ar, A, P, C, verts
+        elif A<7000 and 0.2<C<0.26:
             return 'Arrow', ar, A, P, C, verts
     elif verts == 10:
         if 0.25<C<0.30 and A<8000:
