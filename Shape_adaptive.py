@@ -10,11 +10,11 @@ color_ranges = {
     'Red':    [(105, 110, 120), (130, 160, 180)]
 }
 '''
-ARROW_AREA_RANGE = (2500, 6000)
+SHAPE_AREA_RANGE = (2500, 20000)
 
 
-def build_arrow_candidate_mask(blur_gray, blur_sat):
-    """Return a mask of blobs whose geometry looks close to the arrow target."""
+def build_shape_candidate_mask(blur_gray, blur_sat):
+    """Return a mask of blobs whose geometry looks close to our known shapes."""
     adaptive_dark = cv2.adaptiveThreshold(
         blur_gray,
         255,
@@ -43,7 +43,7 @@ def build_arrow_candidate_mask(blur_gray, blur_sat):
     contours, _ = cv2.findContours(candidate_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     filtered_mask = np.zeros_like(blur_gray)
 
-    min_area, max_area = ARROW_AREA_RANGE
+    min_area, max_area = SHAPE_AREA_RANGE
     for cnt in contours:
         area = cv2.contourArea(cnt)
         if not (min_area <= area <= max_area):
@@ -59,6 +59,10 @@ def build_arrow_candidate_mask(blur_gray, blur_sat):
 
         extent = area / float(bbox_area)
         if extent < 0.25:
+            continue
+
+        label, _, _, _, _, _ = detect_shape(cnt)
+        if label == 'Noise':
             continue
 
         cv2.drawContours(filtered_mask, [cnt], -1, 255, -1)
@@ -150,7 +154,7 @@ def process_shapes(frame):
     # Optionally, ignore the very top of the frame too
     thresh[:50, :] = 0   
     '''
-    adaptive_candidates = build_arrow_candidate_mask(blur_gray, blur_sat)
+    adaptive_candidates = build_shape_candidate_mask(blur_gray, blur_sat)
     thresh = cv2.bitwise_and(mask_color, adaptive_candidates)
 
     # 5. Shape Glue
