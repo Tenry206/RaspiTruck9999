@@ -329,7 +329,7 @@ def main():
                     cv2.putText(frame, f"Circ: {C:.2f}", (cx - 50, cy + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                     cv2.putText(frame, f"{label}", (cx - 50, cy + 45), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
             
-            print(f"TUNING -> {label}: Area={area:.0f}, Corners={verts}, AR={ar:.2f}, Circ={C:.2f}")
+                print(f"TUNING -> {label}: Area={area:.0f}, Corners={verts}, AR={ar:.2f}, Circ={C:.2f}")
             contour_debug = frame.copy()
             all_contours, _ = cv2.findContours(thresh_mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cv2.drawContours(contour_debug, all_contours, -1, (255, 0, 0), 2)
