@@ -4,7 +4,7 @@ from Camera import Camera
 import math
 
 
-SHAPE_AREA_RANGE = (2500, 20000)
+SHAPE_AREA_RANGE = (2500, 33000)
 
 
 def is_shape_candidate(cnt):
