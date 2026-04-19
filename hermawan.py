@@ -183,7 +183,7 @@ def thread_line_follow():
 
         if (current_time - fps_start_time) >= 1.0:
             fps = fps_frame_count / (current_time - fps_start_time)
-            #print(f"--- Sequential Loop Speed: {fps:.1f} FPS ---")
+            print(f"--- Sequential Loop Speed: {fps:.1f} FPS ---")
             fps_frame_count = 0
             fps_start_time = current_time
 
