@@ -13,7 +13,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
-        31,
+        35,
         9
     )
     
@@ -22,7 +22,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY,
-        31,
+        35,
         0
     )
 
@@ -101,9 +101,10 @@ def detect_shape(cnt):
         return 'warning', ar, A, P, C, verts
         
     # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
-    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
+    if verts in [6, 7, 8] and (8000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
         return 'qr', ar, A, P, C, verts
-        
+    if verts in [10] and (8000 < A < 10000) and (0.90 < ar < 1.1) and (0.2 <C<0.33):
+        return 'qr', ar, A, P, C, verts   
     # 3. BUTTON (Target: 9-10 corners, Area ~17k-24k, AR ~1.19-1.33)
     if verts in [8, 9, 10] and (14000 < A < 28000) and (1.10 < ar < 1.45):
         return 'button', ar, A, P, C, verts
@@ -203,7 +204,7 @@ def process_shapes(frame):
     
     
 
-    MAX_DISTANCE = 100
+    MAX_DISTANCE = 110
     centers = []
 
     for cnt in initial_contours:

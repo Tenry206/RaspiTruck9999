@@ -13,8 +13,8 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV,
-        31,
-        9
+        35,
+        16
     )
     
     adaptive_color = cv2.adaptiveThreshold(
@@ -23,7 +23,7 @@ def build_shape_candidate_mask(blur_gray, blur_sat):
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY,
         31,
-        0
+        3
     )
 
     candidate_mask = cv2.bitwise_or(adaptive_dark, adaptive_color)
@@ -101,7 +101,7 @@ def detect_shape(cnt):
         return 'warning', ar, A, P, C, verts
         
     # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
-    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
+    if verts in [6, 7, 8,10] and (8000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
         return 'qr', ar, A, P, C, verts
         
     # 3. BUTTON (Target: 9-10 corners, Area ~17k-24k, AR ~1.19-1.33)
@@ -111,7 +111,7 @@ def detect_shape(cnt):
     if verts in [5, 6] and (12000 < A < 13500) and (0.5 < ar < 0.90):
         return 'button', ar, A, P, C, verts
     
-    if verts in [6, 7] and (8000 < A < 11000) and (0.5 < ar < 0.1):
+    if verts in [6, 7] and (8000 < A < 11000) and (0.5 < ar < 0.6):
         return 'button', ar, A, P, C, verts
     
     if verts in [5,8,10,12] and (8000 < A < 13000) and (0.90 < ar < 1.20) and (0.17 < C < 0.30):
@@ -225,6 +225,7 @@ def process_shapes(frame):
     #cv2.imshow("Linked Threshold Mask", thresh)
 
     results = []
+    found_solid_shape = False
     for cnt in contours:
         if is_line_like_contour(cnt):
             continue
@@ -287,17 +288,17 @@ def process_shapes(frame):
                 'hsv': (0, 0, 0)
                 #'hsv': (h_avg, s_avg, v_avg)
             })
-        if len(results) == 0 or not found_solid_shape:
+    if len(results) == 0 or not found_solid_shape:
+    
+        # 1. Extract the thin box
+        thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 121, 16)
+        line_kernel = np.ones((11, 11), np.uint8)
+        thin_line_mask = cv2.morphologyEx(thin_line_mask, cv2.MORPH_CLOSE, line_kernel)
         
-            # 1. Extract the thin box
-            thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 121, 16)
-            line_kernel = np.ones((11, 11), np.uint8)
-            thin_line_mask = cv2.morphologyEx(thin_line_mask, cv2.MORPH_CLOSE, line_kernel)
-            
-            box_contours, hierarchy = cv2.findContours(thin_line_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            
-            roi_mask = np.zeros_like(gray)
-            box_found = False
+        box_contours, hierarchy = cv2.findContours(thin_line_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        roi_mask = np.zeros_like(gray)
+        box_found = False
         
         if hierarchy is not None:
             for i, c in enumerate(box_contours):
@@ -426,9 +427,7 @@ def main():
             all_contours, _ = cv2.findContours(thresh_mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cv2.drawContours(contour_debug, all_contours, -1, (255, 0, 0), 2)
 
-            raw_view = cv2.resize(original_frame, (640, 480))
-            contour_view = cv2.resize(frame, (640, 480))
-            debug_view = np.hstack((raw_view, contour_view))
+    
             
             cv2.imshow("Shape Drawn Contours", contour_debug)
             cv2.imshow("Shape Threshold Mask", thresh_mask)

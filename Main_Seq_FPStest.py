@@ -1,6 +1,6 @@
 from gpiozero import OutputDevice, PWMOutputDevice as pwm
 from time import time,sleep
-from Camera import Camera
+from Camera_backup import Camera
 import cv2
 import numpy as np
 from Symbol import symbol_detect, build_templatesF

@@ -30,11 +30,11 @@ def detect_shape(cnt):
     _,_,w,h = cv2.boundingRect(approx)
     ar = w/float(h)
     
-    if verts in [4,5,6] and (20000 < A < 36000) and (0.95 < ar < 1.25):
+    if verts in [4,5,6] and (20000 < A < 38000) and (0.95 < ar < 1.25):
         return 'warning', ar, A, P, C, verts
         
     # 2. QR CODE (Target: 6-8 corners, Area ~11k-17k, AR ~1.01-1.10)
-    if verts in [6, 7, 8] and (9000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
+    if verts in [6, 7, 8,10] and (8000 < A < 20000) and (0.90 < ar < 1.4) and (0.09 <C<0.33):
         return 'qr', ar, A, P, C, verts
         
     # 3. BUTTON (Target: 9-10 corners, Area ~17k-24k, AR ~1.19-1.33)
@@ -133,7 +133,7 @@ def process_shapes(frame):
     
     # 1. Adaptive Thresholding: Perfect for finding thin lines on varying backgrounds!
     # It compares a pixel to its neighbors (21x21 block), pulling out the thin box.
-    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 121, 16)
+    thin_line_mask = cv2.adaptiveThreshold(blur_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 37, 7)
     
     # 2. Thicken the thin line slightly so the 4 corners connect into a solid square
     line_kernel = np.ones((11, 11), np.uint8)
@@ -161,7 +161,7 @@ def process_shapes(frame):
             area = cv2.contourArea(c)
             
             # Look for a medium-to-large square (the black bounding box)
-            if 20000 < area < 47000: 
+            if 15000 < area < 47000: 
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.04 * peri, True)
                 
