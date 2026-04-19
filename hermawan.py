@@ -257,6 +257,8 @@ def thread_vision():
     global orb, matcher, templatesF, vision_roi
     
     symbol_cooldown = 0
+    fps_start_time = time()
+    fps_frame_count = 0
     while state.running:
         start = time()
 
@@ -304,6 +306,14 @@ def thread_vision():
                 print(shape['label'])
                 state.set_override('STOP')
                 symbol_cooldown = 150
+
+        fps_frame_count +=1
+        current_time = time()
+        if(current_time - fps_start_time) >= 1.0:
+            fps = fps_frame_count / (current_time - fps_start_time)
+            print(f"[Vision Thread] Speed: {fps:.1f} Iterations/s")
+            fps_frame_count = 0
+            fps_start_time = current_time
         # 10 FPS
         sleep(0.01)
 
@@ -399,7 +409,7 @@ try:
                 print(f"[Main Display Thread] Speed: {fps:.1f} FPS")
                 main_fps_frame_count = 0
                 main_fps_start_time = current_time
-                
+
             # ===============================================
             # FACIAL RECOGNITION MODE
             # ===============================================
@@ -444,6 +454,7 @@ try:
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("Quit triggered ...")
                     state.running = False
+        
 
 except KeyboardInterrupt:
 
