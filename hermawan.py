@@ -311,6 +311,9 @@ def thread_vision():
         #print(fps)
 
 def thread_motor():
+    fps_start_time = time()
+    fps_frame_count = 0
+
     while state.running:
         override = state.get_override()
 
@@ -344,6 +347,13 @@ def thread_motor():
             left,right = state.get_steering()
             set_motor(ENA, IN1, IN2, left)
             set_motor(ENB, IN3, IN4, right) 
+        fps_frame_count +=1
+        current_time = time()
+        if(current_time - fps_start_time) >= 1.0:
+            fps = fps_frame_count / (current_time - fps_start_time)
+            print(f"[Motor Thread] Speed: {fps:.1f} Iterations/s")
+            fps_frame_count = 0
+            fps_start_time = current_time
 
         # 20 FPS
         sleep(0.05)
@@ -372,12 +382,24 @@ threads = [
 for t in threads:
     t.start()
 
+# Main Loop FPS setup
+main_fps_start_time = time()
+main_fps_frame_count = 0
 try:
     while state.running:
         display_frame = state.get_frame()
 
         if display_frame is not None:
             override = state.get_override()
+
+            main_fps_frame_count += 1
+            current_time = time()
+            if (current_time - main_fps_start_time) >= 1.0:
+                fps = main_fps_frame_count / (current_time - main_fps_start_time)
+                print(f"[Main Display Thread] Speed: {fps:.1f} FPS")
+                main_fps_frame_count = 0
+                main_fps_start_time = current_time
+                
             # ===============================================
             # FACIAL RECOGNITION MODE
             # ===============================================
